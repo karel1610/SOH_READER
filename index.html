@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pembaca Excel Offline</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f7a4d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1d2330;--mut:#6b7385;--bd:#dfe3ea;--ac:#1f7a4d;--acx:#fff;--hl:#fff1a8;--cur:#ffc94d;--hd:#eef1f5;--bad:#c62828;--warn:#d9730d;--soon:#a67c00}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1c2027;--tx:#e8ebf0;--mut:#98a1b3;--bd:#2d333d;--ac:#3cb678;--acx:#0d1a13;--hl:#5a4d0f;--cur:#9a6b00;--hd:#242a33;--bad:#ff6b6b;--warn:#ffa94d;--soon:#e6c34a}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--bd)}
+header h1{font-size:16px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{background:var(--ac);color:var(--acx);border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:14px;white-space:nowrap}
+.btn.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn input{display:none}
+nav{display:flex;background:var(--card);border-bottom:1px solid var(--bd)}
+nav button{flex:1;padding:10px;border:0;background:none;color:var(--mut);font-size:14px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--ac);border-bottom-color:var(--ac)}
+#fbar{display:none;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:7px 12px;background:var(--card);border-bottom:1px solid var(--bd);font-size:13px;color:var(--mut)}
+#fbar select{padding:5px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font-size:13px}
+#fbar .btn{padding:5px 10px;font-size:12px}
+#fbar .cnt{margin-left:auto;font-weight:600;color:var(--tx)}
+.fit .c,.fit .h{font-size:11px;padding:0 3px}
+.fit .h{padding-right:15px;font-size:10px}
+.fit .h .fb{width:14px;right:0;font-size:9px}
+.fit .rn{width:36px;font-size:10px;padding:0}
+#imgv{position:fixed;inset:0;z-index:200;background:#111;color:#fff;display:none;overflow:auto}
+#imgt{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#111;border-bottom:1px solid #333;font-size:12px;color:#bbb}
+#imgb img{width:100%;display:block;background:#fff}
+#imgb .cap{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:13px;color:#ddd}
+#imgb .cap .btn{padding:5px 12px;font-size:13px;text-decoration:none}
+#cbar{display:none;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:7px 12px;background:var(--hl);color:var(--tx);border-bottom:1px solid var(--bd);font-size:13px}
+#cbar select{padding:5px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);font-size:13px;max-width:100%}
+#cbar .btn{padding:5px 10px;font-size:12px}
+#cbar label{display:flex;gap:4px;align-items:center}
+#cbar #cInfo{flex-basis:100%;font-size:12px;opacity:.8}
+.x0{color:var(--bad);font-weight:700}.x1{color:var(--warn);font-weight:700}.x2{color:var(--soon);font-weight:700}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.tab{flex:1;min-height:0;display:none;flex-direction:column}
+.tab.on{display:flex}
+#empty{margin:auto;text-align:center;color:var(--mut);padding:24px;max-width:360px}
+#empty .big{font-size:42px}
+#bar{display:none;padding:6px 12px;background:var(--card);border-bottom:1px solid var(--bd);font-size:13px;gap:8px;align-items:baseline}
+#bar b{color:var(--ac);white-space:nowrap}
+#bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+#sheets{display:none;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--bd)}
+#sheets button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:999px;padding:5px 12px;white-space:nowrap;cursor:pointer;font-size:13px}
+#sheets button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+#sc{flex:1;min-height:0;overflow:auto;position:relative;background:var(--card);display:none;-webkit-overflow-scrolling:touch}
+#hd{position:sticky;top:0;z-index:3;display:flex;height:28px;background:var(--hd)}
+#sz{position:relative}
+#rows{position:absolute;left:0}
+.r{display:flex}
+.c,.h,.rn{flex:none;height:26px;line-height:25px;padding:0 6px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.h{height:28px;line-height:27px;text-align:left;color:var(--mut);font-weight:700;font-size:12px;background:var(--hd);position:relative;padding-right:28px;cursor:pointer;user-select:none}
+.h:hover{color:var(--tx)}
+.h .fb{position:absolute;right:3px;top:3px;width:22px;height:22px;line-height:20px;border-radius:4px;text-align:center;font-size:11px;color:var(--mut);background:transparent}
+.h:hover .fb{background:var(--bd)}
+.h.act{color:var(--ac)}
+.h.act .fb{background:var(--ac);color:var(--acx)}
+.rn{width:60px;position:sticky;left:0;z-index:2;background:var(--hd);color:var(--mut);font-size:12px;text-align:center}
+#hd .rn{z-index:4;height:28px}
+.c.m{background:var(--hl)}
+.c.cur{background:var(--cur);outline:2px solid var(--ac);outline-offset:-2px}
+.c.sel{outline:2px solid var(--ac);outline-offset:-2px}
+#menu{position:fixed;z-index:100;width:260px;max-width:calc(100vw - 16px);background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.3);padding:8px;display:flex;flex-direction:column;gap:6px}
+#menu .row{display:flex;gap:6px}
+#menu .row .btn{flex:1;padding:6px 8px;font-size:13px}
+#menu .ms{width:100%;padding:7px 9px;font-size:14px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
+#menu .list{max-height:240px;overflow:auto;border:1px solid var(--bd);border-radius:6px;padding:3px}
+#menu label{display:flex;gap:7px;align-items:center;padding:3px 4px;font-size:13px;cursor:pointer;border-radius:4px}
+#menu label:hover{background:var(--bg)}
+#menu label span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#menu .n{color:var(--mut);font-size:11px}
+#menu .note{padding:4px 6px;color:var(--mut);font-size:12px}
+#sbox{padding:12px;background:var(--card);border-bottom:1px solid var(--bd)}
+#q{width:100%;padding:11px 12px;font-size:16px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx)}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;color:var(--mut);font-size:13px;align-items:center}
+.opts label{display:flex;gap:5px;align-items:center}
+.opts select{padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font-size:13px;max-width:170px}
+#sum{padding:8px 12px;color:var(--mut);font-size:13px}
+#res{flex:1;min-height:0;overflow:auto;padding:0 12px 16px}
+.res{display:block;width:100%;text-align:left;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:pointer;font-size:14px}
+.res .loc{display:block;color:var(--ac);font-weight:700;font-size:12px;margin-bottom:4px}
+.kv{display:flex;flex-wrap:wrap;gap:2px 14px}
+.kv div{white-space:nowrap}
+.kv i{font-style:normal;color:var(--mut);font-size:11px;margin-right:4px;text-transform:uppercase}
+.more{width:100%;margin-top:4px}
+mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
+#err{display:none;margin:10px 12px;padding:10px;border-radius:8px;background:#fde4e4;color:#8a1f1f}
+#drop{position:fixed;inset:0;background:rgba(31,122,77,.85);color:#fff;display:none;align-items:center;justify-content:center;font-size:22px;font-weight:700;z-index:99}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Pembaca Excel Offline</h1>
+  <button class="btn sec" id="bCols" title="Pilih kolom yang ditampilkan">Kolom</button>
+  <label class="btn sec" id="bPrev" style="display:none" title="Pilih file SOH kemarin untuk dibandingkan dengan file yang sedang terbuka (hari ini)">Bandingkan<input type="file" id="filePrev" accept=".xlsx,.xlsm"></label>
+  <label class="btn">Buka file<input type="file" id="file" accept=".xlsx,.xlsm"></label>
+</header>
+<nav>
+  <button id="tLihat" class="on">Lihat</button>
+  <button id="tCari">Cari</button>
+</nav>
+<div id="fbar">
+  <label>Kedaluwarsa:
+    <select id="oExp">
+      <option value="">Semua</option>
+      <option value="x">Sudah expired</option>
+      <option value="30">≤ 30 hari</option>
+      <option value="60">≤ 60 hari</option>
+      <option value="90">≤ 90 hari</option>
+      <option value="180">≤ 180 hari</option>
+      <option value="c">Kustom…</option>
+    </select>
+  </label>
+  <span><b class="x0">■</b> lewat &nbsp;<b class="x1">■</b> ≤30 hari &nbsp;<b class="x2">■</b> ≤90 hari</span>
+  <span id="lFlag" style="display:none;align-items:center;gap:6px" title="Exp sebelum tgl transaksi, umur simpan jauh dari kebiasaan barang yang sama, umur >5 tahun, atau tgl transaksi di masa depan"><label style="cursor:pointer"><input type="checkbox" id="oFlag"> <b class="x0">⚠ Curiga salah input exp</b> <span id="nFlag"></span></label><select id="oSens" title="Sensitivitas deteksi"><option value="l">Longgar</option><option value="m" selected>Sedang</option><option value="k">Ketat</option></select></span>
+  <button class="btn sec" id="bReset" style="display:none">Reset filter</button>
+  <button class="btn sec" id="bImg" title="Buat gambar PNG dari data yang sedang tampil (sesuai filter &amp; urutan)">Gambar</button>
+  <button class="btn sec" id="bFit" title="Perkecil kolom &amp; huruf supaya semua kolom muat selebar layar (untuk screenshot)">Mode SS</button>
+  <button class="btn sec" id="bCsv" title="Unduh baris yang tampil (sesuai filter &amp; urutan) sebagai CSV">Ekspor CSV</button>
+  <span class="cnt"><span id="cnt"></span><br><span id="tot" style="font-weight:400;color:var(--mut)"></span></span>
+</div>
+<div id="cbar">
+  <b>Bandingkan:</b>
+  <select id="cMode">
+    <option value="hilang">Hilang: ada kemarin, tidak ada hari ini</option>
+    <option value="tetap">Masih ada: ada di kedua file</option>
+    <option value="baru">Baru: hanya ada hari ini</option>
+  </select>
+  <span id="cHil" style="display:flex;gap:10px;flex-wrap:wrap">
+    <label><input type="checkbox" id="cComm" checked> kemarin COMM_QTY &gt; 0</label>
+    <label><input type="checkbox" id="cRes" checked> hanya USAGE Reserve</label>
+  </span>
+  <button class="btn sec" id="cKey" title="Kolom yang dipakai untuk mencocokkan baris">Kunci…</button>
+  <button class="btn sec" id="cOff">Tutup bandingkan</button>
+  <span id="cInfo"></span>
+</div>
+<div id="err"></div>
+<main>
+  <section class="tab on" id="viewTab">
+    <div id="empty"><div class="big">📊</div><p><b>Belum ada file</b></p><p>Tekan <b>Buka file</b> atau seret file .xlsx ke sini. Semua diproses di perangkat Anda, tanpa internet. File besar (ratusan ribu baris) didukung.</p></div>
+    <div id="sheets"></div>
+    <div id="bar"><b id="ref"></b><span id="val"></span></div>
+    <div id="sc"><div id="hd"></div><div id="sz"><div id="rows"></div></div></div>
+  </section>
+  <section class="tab" id="searchTab">
+    <div id="sbox">
+      <input id="q" type="search" placeholder="Cari… (beberapa kata = semuanya harus cocok)" autocomplete="off">
+      <div class="opts">
+        <label>Kolom: <select id="oCol"><option value="-1">Semua kolom</option></select></label>
+        <label><input type="checkbox" id="oAll" checked> Semua sheet</label>
+        <label><input type="checkbox" id="oCase"> Besar/kecil huruf</label>
+        <label><input type="checkbox" id="oWhole"> Isi sel persis</label>
+      </div>
+    </div>
+    <div id="sum">Buka file lalu ketik kata yang dicari. Filter di atas ikut berlaku.</div>
+    <div id="res"></div>
+  </section>
+</main>
+<div id="imgv">
+  <div id="imgt"><button class="btn sec" id="imgClose">Tutup</button><button class="btn sec" id="imgCols">Ubah kolom</button><span>Tekan Simpan, atau screenshot layar ini (gambar sudah selebar layar)</span></div>
+  <div id="imgb"></div>
+</div>
+<div id="drop">Lepas file di sini</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const RH=26,HH=28,STEP=200,MAXRES=200000;let RNW=60;
+const DEFAULT_COLS="whs, group name, location, description, s_ava_qty, comm_qty, transc_date, exp_date, usage";
+let book=null, si=0, cur=null, sel=null, matches=new Map(), results=[], shown=0, lastFile=null;
+let expRange=null;           // null | [minHari, maxHari]
+const coll=new Intl.Collator(undefined,{numeric:true,sensitivity:"base"});
+
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+let colSetting=lsGet("cols2");if(colSetting===null)colSetting=DEFAULT_COLS;
+const todayN=()=>{const t=new Date();return Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())/864e5;};
+
+/* ---------- ZIP (tanpa library; dekompresi pakai DecompressionStream bawaan browser) ---------- */
+function unzip(buf){
+  const dv=new DataView(buf),u8=new Uint8Array(buf);
+  let e=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-65600);i--){
+    if(dv.getUint32(i,true)===0x06054b50){e=i;break;}
+  }
+  if(e<0) throw new Error("Bukan file .xlsx yang valid (format lama .xls tidak didukung).");
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);
+  const files={};
+  for(let i=0;i<n;i++){
+    if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),usize=dv.getUint32(p+24,true),
+      nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+    files[new TextDecoder().decode(u8.subarray(p+46,p+46+nl))]={method,csize,usize,off};
+    p+=46+nl+el+cl;
+  }
+  return {
+    has:n=>!!files[n],
+    size:n=>files[n]?files[n].usize:0,
+    stream(name){
+      const f=files[name]; if(!f) return null;
+      const ln=dv.getUint16(f.off+26,true),le=dv.getUint16(f.off+28,true);
+      const st=f.off+30+ln+le, s=new Blob([u8.subarray(st,st+f.csize)]).stream();
+      if(f.method===0) return s;
+      if(f.method!==8) throw new Error("Metode kompresi tidak didukung.");
+      if(typeof DecompressionStream==="undefined") throw new Error("Browser terlalu lama. Gunakan Chrome, Edge, Safari atau Firefox versi terbaru.");
+      return s.pipeThrough(new DecompressionStream("deflate-raw"));
+    },
+    async text(name){const s=this.stream(name);return s?await new Response(s).text():null;}
+  };
+}
+async function eachChunk(stream,cb,onProg){
+  const rd=stream.getReader(),dec=new TextDecoder();let got=0,last=0;
+  for(;;){
+    const {done,value}=await rd.read();if(done)break;
+    got+=value.length;cb(dec.decode(value,{stream:true}));
+    const now=performance.now();if(onProg&&now-last>120){last=now;onProg(got);await new Promise(r=>setTimeout(r));}
+  }
+  const t=dec.decode();if(t)cb(t);
+}
+
+/* ---------- XLSX ---------- */
+const xml=t=>new DOMParser().parseFromString(t,"application/xml");
+const attrL=(el,ln)=>{for(const a of el.attributes) if(a.localName===ln) return a.value;return null;};
+function unesc(s){
+  if(s.indexOf("&")<0)return s;
+  return s.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi,(m,g)=>{
+    if(g[0]==="#")return String.fromCodePoint(g[1]==="x"||g[1]==="X"?parseInt(g.slice(2),16):parseInt(g.slice(1),10));
+    return {amp:"&",lt:"<",gt:">",quot:'"',apos:"'"}[g.toLowerCase()];
+  });
+}
+const RE_T=/<t(?:\s[^>]*)?>([^<]*)<\/t>/g;
+function textOf(seg){
+  if(seg.indexOf("<rPh")>=0) seg=seg.replace(/<rPh[\s\S]*?<\/rPh>/g,"");
+  let s="",m;RE_T.lastIndex=0;
+  while((m=RE_T.exec(seg))) s+=m[1];
+  return unesc(s);
+}
+function colName(i){let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26);}return s;}
+const p2=x=>String(x).padStart(2,"0");
+function fmtDate(n){
+  const d=new Date(Math.round((n-25569)*864e5));
+  const ds=d.getUTCFullYear()+"/"+p2(d.getUTCMonth()+1)+"/"+p2(d.getUTCDate());
+  const ts=p2(d.getUTCHours())+":"+p2(d.getUTCMinutes());
+  if(n<1) return ts;
+  return Math.abs(n-Math.floor(n))>1e-9?ds+" "+ts:ds;
+}
+function fmtNum(v){
+  if(/^-?\d+$/.test(v)) return v;
+  const n=Number(v); if(!isFinite(n)) return v;
+  return String(parseFloat(n.toPrecision(15)));
+}
+function parseStyles(t){
+  const kinds=[]; if(!t) return kinds;
+  const d=xml(t), codes={};
+  for(const nf of d.getElementsByTagName("numFmt")) codes[nf.getAttribute("numFmtId")]=nf.getAttribute("formatCode")||"";
+  const cx=d.getElementsByTagName("cellXfs")[0];
+  if(!cx) return kinds;
+  for(const xf of cx.children){
+    const id=+xf.getAttribute("numFmtId")||0, code=codes[id];
+    let k=null;
+    if((id>=14&&id<=22)||(id>=45&&id<=47)) k={t:"d"};
+    else if(id===9) k={t:"p",dec:0};
+    else if(id===10) k={t:"p",dec:2};
+    else if(code){
+      const c=code.replace(/"[^"]*"/g,"").replace(/\[[^\]]*\]/g,"").replace(/\\./g,"");
+      if(c.includes("%")) k={t:"p",dec:((c.match(/0\.(0+)/)||[,""])[1]).length};
+      else if(/[dmyhs]/i.test(c)&&!/[0#]/.test(c)) k={t:"d"};
+    }
+    kinds.push(k);
+  }
+  return kinds;
+}
+const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,"");
+const RE_C=/<c r="([A-Z]+)\d+"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
+const RE_V=/<v>([^<]*)<\/v>/, RE_TT=/\bt="(\w+)"/, RE_S=/\bs="(\d+)"/;
+const RE_D=/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/;
+function cellText(attrs,inner,ss,kinds){
+  if(!inner) return "";
+  const tm=RE_TT.exec(attrs),t=tm?tm[1]:"n";
+  if(t==="inlineStr") return textOf(inner);
+  const vm=RE_V.exec(inner); if(!vm) return "";
+  const v=vm[1];
+  if(t==="s") return ss[+v]||"";
+  if(t==="str"||t==="e") return unesc(v);
+  if(t==="b") return v==="1"?"TRUE":"FALSE";
+  if(v==="") return "";
+  const sm=RE_S.exec(attrs),k=sm?kinds[+sm[1]]:null,n=Number(v);
+  if(k&&k.t==="d"&&isFinite(n)) return fmtDate(n);
+  if(k&&k.t==="p"&&isFinite(n)) return (n*100).toFixed(k.dec)+"%";
+  return fmtNum(v);
+}
+/* Baca sheet secara streaming; hanya simpan kolom yang dipilih. */
+async function parseSheetStream(stream,total,ss,kinds,wanted,prog){
+  let buf="",colMap=null,hdr=null;const rows=[];
+  const proc=()=>{
+    let p=0;
+    for(;;){
+      const e=buf.indexOf("</row>",p);if(e<0)break;
+      const s=buf.lastIndexOf("<row",e);
+      const bs=buf.indexOf(">",s)+1;
+      const body=buf.slice(bs,e);p=e+6;
+      if(!colMap){
+        const letters=[],names=[];let m;RE_C.lastIndex=0;
+        while((m=RE_C.exec(body))){const t=cellText(m[2],m[3],ss,kinds);if(t!==""){letters.push(m[1]);names.push(t);}}
+        const pick=[];
+        if(wanted&&wanted.length){
+          for(const w of wanted){const k=names.findIndex(n=>norm(n)===w);if(k>=0&&!pick.includes(k))pick.push(k);}
+        }
+        if(!pick.length)names.forEach((_,i)=>pick.push(i));
+        colMap=new Map();hdr=[];
+        pick.forEach((k,o)=>{colMap.set(letters[k],o);hdr.push(names[k]);});
+        continue;
+      }
+      const row=new Array(hdr.length).fill("");let any=false,m;RE_C.lastIndex=0;
+      while((m=RE_C.exec(body))){
+        const o=colMap.get(m[1]);if(o===undefined)continue;
+        const t=cellText(m[2],m[3],ss,kinds);if(t!==""){row[o]=t;any=true;}
+      }
+      if(any)rows.push(row);
+    }
+    buf=buf.slice(p);
+  };
+  await eachChunk(stream,t=>{buf+=t;proc();},got=>prog&&prog(got/Math.max(total,1)));
+  return {hdr:hdr||[],rows};
+}
+async function loadBook(buf,prog){
+  const z=unzip(buf);
+  const wbT=await z.text("xl/workbook.xml");
+  if(!wbT) throw new Error("File ini bukan workbook Excel (.xlsx).");
+  const wb=xml(wbT);
+  const rels={};
+  const rT=await z.text("xl/_rels/workbook.xml.rels");
+  if(rT) for(const r of xml(rT).getElementsByTagName("Relationship")){
+    let tg=r.getAttribute("Target")||"";
+    tg=tg.startsWith("/")?tg.slice(1):"xl/"+tg;
+    rels[r.getAttribute("Id")]=tg.replace("xl/../","");
+  }
+  const kinds=parseStyles(await z.text("xl/styles.xml"));
+  const ss=[];
+  if(z.has("xl/sharedStrings.xml")){
+    let buf2="";
+    await eachChunk(z.stream("xl/sharedStrings.xml"),t=>{
+      buf2+=t;let p=0;
+      for(;;){
+        const e=buf2.indexOf("</si>",p);if(e<0)break;
+        const s=buf2.indexOf("<si>",p);
+        ss.push(s>=0&&s<e?textOf(buf2.slice(s+4,e)):"");
+        p=e+5;
+      }
+      buf2=buf2.slice(p);
+    },got=>prog&&prog(0.35*got/Math.max(z.size("xl/sharedStrings.xml"),1)));
+  }
+  const wanted=colSetting.trim()?colSetting.split(",").map(norm).filter(Boolean):null;
+  const sheets=[];let i=0;
+  const defs=[...wb.getElementsByTagName("sheet")].filter(s=>!/hidden/i.test(s.getAttribute("state")||""));
+  for(const s of defs){
+    i++;
+    const path=rels[attrL(s,"id")]||`xl/worksheets/sheet${i}.xml`;
+    if(!z.has(path)) continue;
+    const base=0.35+0.65*(sheets.length/defs.length),span=0.65/defs.length;
+    const sh=await parseSheetStream(z.stream(path),z.size(path),ss,kinds,wanted,f=>prog&&prog(base+span*f));
+    sh.name=s.getAttribute("name")||("Sheet"+i);
+    sh.nr=sh.rows.length;sh.nc=sh.hdr.length;
+    sh.filters={};sh.sort=null;
+    sh.expCol=sh.hdr.findIndex(h=>norm(h)==="expdate");
+    sh.trCol=sh.hdr.findIndex(h=>norm(h)==="transcdate");
+    sh.qCols=sh.hdr.map((h,c)=>/^(savaqty|commqty)$/.test(norm(h))?c:-1).filter(c=>c>=0);
+    sh.exp=new Float64Array(sh.nr).fill(NaN);
+    sh.flag=new Uint8Array(sh.nr);sh.chkCol=-1;sh.nFlag=0;
+    const dayOf=t=>{const m=RE_D.exec(t||"");return m?Date.UTC(+m[1],+m[2]-1,+m[3])/864e5:NaN;};
+    if(sh.expCol>=0)for(let r=0;r<sh.nr;r++)sh.exp[r]=dayOf(sh.rows[r][sh.expCol]);
+    if(sh.expCol>=0&&sh.trCol>=0)addCheck(sh,dayOf);
+    const w=sh.hdr.map(h=>Math.min(320,h.length*8+48));
+    for(let r=0;r<Math.min(sh.nr,300);r++){const row=sh.rows[r];
+      for(let c=0;c<sh.nc;c++){const x=row[c];if(x)w[c]=Math.max(w[c],Math.min(320,x.length*8+20));}}
+    if(sh.chkCol>=0)w[sh.chkCol]=300;
+    sh.w0=w;layoutCols(sh);
+    rebuildView(sh);
+    sheets.push(sh);
+  }
+  if(!sheets.length) throw new Error("Tidak ada sheet yang bisa dibaca.");
+  return sheets;
+}
+
+/* ---------- Deteksi dini salah input EXP ---------- */
+/* Umur simpan tiap baris = EXP - TRANSAKSI. Pembanding = median umur simpan barang yang sama
+   (min. 4 baris). Toleransi otomatis per barang:
+   - barang "seragam" (>=70% lot dalam ±3 hari dari median): toleransi kecil (c1)
+   - barang bervariasi: max(c2, k x sebaran(MAD), f x median)
+   Sensitivitas mengatur c1/c2/k/f. Juga: exp <= transaksi, umur >5 tahun, transaksi di masa depan. */
+const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const SENS={k:{c1:3,c2:7,k:3,f:.10},m:{c1:5,c2:14,k:4,f:.20},l:{c1:10,c2:30,k:6,f:.50}};
+let sens="m";
+function addCheck(sh,dayOf){
+  const rows=sh.rows,n=sh.nr;
+  const pc=sh.hdr.findIndex(h=>norm(h)==="pluvital"),dc=sh.hdr.findIndex(h=>norm(h)==="description");
+  const kc=pc>=0?pc:dc;
+  const tr=new Float64Array(n),keys=new Array(n),groups=new Map();
+  for(let r=0;r<n;r++){
+    tr[r]=dayOf(rows[r][sh.trCol]);
+    const k=kc>=0?rows[r][kc].toLowerCase():"";keys[r]=k;
+    const life=sh.exp[r]-tr[r];
+    if(life>0){let g=groups.get(k);if(!g)groups.set(k,g=[]);g.push(life);}
+  }
+  const info=new Map();
+  for(const [k,g] of groups){
+    if(g.length<4)continue;
+    const med=median(g),mad=median(g.map(l=>Math.abs(l-med)));
+    const cons=g.filter(l=>Math.abs(l-med)<=3).length/g.length>=0.7;
+    info.set(k,{med,mad,cons});
+  }
+  sh.hdr.push("CEK_EXP");sh.chkCol=sh.nc;sh.nc++;
+  for(let r=0;r<n;r++)rows[r].push("");
+  sh.chk={tr,keys,info};
+  runCheck(sh);
+}
+function runCheck(sh){
+  if(sh.chkCol<0)return;
+  const P=SENS[sens],{tr,keys,info}=sh.chk,T=todayN(),rows=sh.rows;
+  sh.nFlag=0;
+  for(let r=0;r<sh.nr;r++){
+    const e=sh.exp[r],t=tr[r],msgs=[];let bit=0;
+    if(e===e&&t===t){
+      const life=e-t;
+      if(life<=0){msgs.push("Exp ≤ tgl transaksi");bit|=1;}
+      else{
+        const f=info.get(keys[r]);let dev=false;
+        if(f){
+          const tol=f.cons?P.c1:Math.max(P.c2,P.k*f.mad,P.f*f.med);
+          if(Math.abs(life-f.med)>tol){
+            let m="Umur "+life+" hari (biasanya ±"+Math.round(f.med)+")";
+            const mm=RE_D.exec(rows[r][sh.expCol]);
+            if(mm&&+mm[3]<=12&&+mm[3]!==+mm[2]){
+              const swl=Date.UTC(+mm[1],+mm[3]-1,+mm[2])/864e5-t;
+              if(Math.abs(swl-f.med)<=tol&&Math.abs(swl-f.med)<Math.abs(life-f.med)/2)m+=" — hari/bulan tertukar?";
+            }
+            msgs.push(m);bit|=2;dev=true;
+          }
+        }
+        if(!dev&&life>1826){msgs.push("Umur simpan >5 tahun");bit|=4;}
+      }
+    }
+    if(t===t&&t>T+1){msgs.push("Tgl transaksi di masa depan");bit|=4;}
+    rows[r][sh.chkCol]=msgs.join("; ");sh.flag[r]=bit;if(bit)sh.nFlag++;
+  }
+}
+
+/* ---------- Lebar kolom (Mode SS = muat selebar layar) ---------- */
+let fit=false;
+function layoutCols(sh){
+  const w0=sh.w0;let w=w0;
+  if(fit){
+    const avail=Math.max(200,(sc.clientWidth||innerWidth)-RNW-2),tot=w0.reduce((a,b)=>a+b,0);
+    if(tot>avail){
+      const k=avail/tot;w=w0.map(v=>Math.max(30,Math.floor(v*k)));
+      let sum=w.reduce((a,b)=>a+b,0);
+      for(let g=0;sum>avail&&g<5;g++){ // kolom lebar dikurangi dulu bila total masih lebih
+        const big=w.map((v,i)=>[v,i]).sort((x,y)=>y[0]-x[0])[0];
+        const cut=Math.min(sum-avail,Math.max(0,big[0]-30));w[big[1]]-=cut;sum-=cut;
+      }
+    }
+  }
+  sh.w=w;sh.x=[];let a=0;for(const v of w){sh.x.push(a);a+=v;}sh.tw=a;
+}
+/* ---------- Filter, urutan, view ---------- */
+let onlyFlag=false;
+function passes(sh,r,F,er,T){
+  const row=sh.rows[r];
+  if(onlyFlag&&sh.chkCol>=0&&!sh.flag[r]) return false;
+  if(sh.cmpSel&&!sh.cmpSel[r]) return false;
+  for(let j=0;j<F.length;j++) if(!F[j][1].has(row[F[j][0]]||"")) return false;
+  if(er){const d=sh.exp[r]-T;if(!(d>=er[0]&&d<=er[1]))return false;}
+  return true;
+}
+function rebuildView(sh){
+  const T=todayN(),F=Object.keys(sh.filters).map(k=>[+k,sh.filters[k]]),er=expRange&&sh.expCol>=0?expRange:null;
+  const v=[];
+  for(let r=0;r<sh.nr;r++) if(passes(sh,r,F,er,T)) v.push(r);
+  if(sh.sort){
+    const {c,dir}=sh.sort,rows=sh.rows;
+    let numeric=false;
+    {let any=false,all=true;for(let k=0;k<Math.min(v.length,300);k++){const x=rows[v[k]][c];if(x==="")continue;any=true;if(!isFinite(+x)){all=false;break;}}numeric=any&&all;}
+    v.sort((a,b)=>{
+      const x=rows[a][c],y=rows[b][c];
+      if(x===""&&y==="")return 0;if(x==="")return 1;if(y==="")return -1;
+      return (numeric?(+x)-(+y):coll.compare(x,y))*dir;
+    });
+  }
+  sh.view=v;
+  const pos=new Int32Array(sh.nr).fill(-1);
+  for(let i=0;i<v.length;i++)pos[v[i]]=i;
+  sh.pos=pos;
+}
+const anyFilter=()=>!!(expRange||onlyFlag||(book&&book.some(s=>Object.keys(s.filters).length||s.sort)));
+const fmtN=x=>(Math.round(x*100)/100).toLocaleString("id-ID");
+function updateFbar(){
+  if(!book)return;
+  const s=curSheet();
+  $("cnt").textContent=s.view.length.toLocaleString("id-ID")+" dari "+s.nr.toLocaleString("id-ID")+" baris";
+  const sums=s.qCols.map(c=>{let t=0;for(const r of s.view){const v=parseFloat(s.rows[r][c]);if(v===v)t+=v;}return s.hdr[c]+" "+fmtN(t);});
+  $("tot").textContent=sums.join(" · ");
+  $("lFlag").style.display=s.chkCol>=0?"inline-flex":"none";
+  $("nFlag").textContent="("+s.nFlag.toLocaleString("id-ID")+")";
+  $("bReset").style.display=anyFilter()?"":"none";
+  const has=book.some(x=>x.expCol>=0);
+  $("oExp").disabled=!has;$("oExp").title=has?"":"Kolom EXP_DATE tidak ada pada kolom yang ditampilkan";
+}
+function afterChange(){
+  setSheet(si);
+  if($("q").value.trim())doSearch();
+}
+function applyFilters(){rebuildView(curSheet());afterChange();}
+function applyExp(){book.forEach(rebuildView);afterChange();}
+
+$("oExp").onchange=()=>{
+  const sv=$("oExp").value;
+  if(sv==="")expRange=null;
+  else if(sv==="x")expRange=[-Infinity,-1];
+  else if(sv==="c"){
+    const n=parseInt(prompt("Tampilkan yang kedaluwarsa dalam berapa hari ke depan?","45"),10);
+    if(!(n>=0)){$("oExp").value=expRange?String(expRange[1]):"";return;}
+    expRange=[0,n];
+    const op=[...$("oExp").options].find(o=>o.value==="c");op.textContent="Kustom: ≤ "+n+" hari";
+  }else expRange=[0,+sv];
+  applyExp();
+};
+$("oFlag").onchange=()=>{onlyFlag=$("oFlag").checked;applyExp();};
+$("oSens").onchange=()=>{sens=$("oSens").value;book.forEach(runCheck);applyExp();};
+$("bFit").onclick=()=>{
+  fit=!fit;RNW=fit?36:60;
+  document.body.classList.toggle("fit",fit);
+  $("bFit").textContent=fit?"Mode SS ✓":"Mode SS";
+  if(!book)return;
+  book.forEach(layoutCols);setSheet(si);
+};
+$("bCsv").onclick=()=>{
+  const s=curSheet();if(!s)return;
+  const q=v=>{v=String(v||"");if(/^0\d+$/.test(v)||/^\d{12,}$/.test(v))return '="'+v+'"';return /[";\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const out=["sep=;",s.hdr.map(q).join(";")];
+  for(const r of s.view)out.push(s.rows[r].map(q).join(";"));
+  const blob=new Blob(["﻿"+out.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=((lastFile&&lastFile.name||"data").replace(/\.xlsx?m?$/i,""))+"_filter.csv";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+};
+$("bReset").onclick=()=>{
+  expRange=null;$("oExp").value="";onlyFlag=false;$("oFlag").checked=false;
+  book.forEach(s=>{s.filters={};s.sort=null;});
+  applyExp();
+};
+
+/* Menu dropdown filter ala Excel */
+let menu=null,menuCol=-1,menuT=0;
+function closeMenu(){if(menu){menu.remove();menu=null;menuCol=-1;}}
+function openMenu(c,anchor){
+  closeMenu();menuCol=c;menuT=performance.now();
+  const sh=curSheet(),T=todayN();
+  const F=Object.keys(sh.filters).filter(k=>+k!==c).map(k=>[+k,sh.filters[k]]);
+  const er=expRange&&sh.expCol>=0?expRange:null;
+  const cnt=new Map();
+  for(let r=0;r<sh.nr;r++){
+    if(!passes(sh,r,F,er,T))continue;
+    const v=sh.rows[r][c]||"";cnt.set(v,(cnt.get(v)||0)+1);
+  }
+  const vals=[...cnt.keys()].sort((a,b)=>a===""?1:b===""?-1:coll.compare(a,b));
+  const cf=sh.filters[c];
+  const base=cf?new Set(vals.filter(v=>cf.has(v))):new Set(vals);
+  let selected=new Set(base),list=vals;
+  const hasSort=sh.sort&&sh.sort.c===c;
+  menu=document.createElement("div");menu.id="menu";
+  menu.innerHTML=`<div class="row"><button class="btn sec" data-a="asc">A → Z</button><button class="btn sec" data-a="desc">Z → A</button></div>`
+    +(hasSort?`<button class="btn sec" data-a="nosort">Hapus urutan</button>`:"")
+    +`<input type="search" class="ms" placeholder="Cari nilai…" autocomplete="off">`
+    +`<label><input type="checkbox" class="ca"><span><b>(Pilih semua)</b></span><span class="n">${vals.length.toLocaleString("id-ID")} nilai</span></label>`
+    +`<div class="list"></div>`
+    +`<div class="row"><button class="btn ok">OK</button><button class="btn sec" data-a="cancel">Batal</button></div>`
+    +(cf?`<button class="btn sec" data-a="clear">Hapus filter kolom ini</button>`:"");
+  document.body.appendChild(menu);
+  const ms=menu.querySelector(".ms"),ca=menu.querySelector(".ca"),le=menu.querySelector(".list"),ok=menu.querySelector(".ok");
+  const LIM=300;
+  function renderList(){
+    le.innerHTML=list.slice(0,LIM).map((v,i)=>`<label><input type="checkbox" data-i="${i}"${selected.has(v)?" checked":""}><span>${v===""?"(Kosong)":esc(v)}</span><span class="n">${cnt.get(v).toLocaleString("id-ID")}</span></label>`).join("")
+      +(list.length>LIM?`<div class="note">+${(list.length-LIM).toLocaleString("id-ID")} nilai lagi — gunakan pencarian</div>`:"")
+      +(!list.length?`<div class="note">Tidak ada nilai cocok</div>`:"");
+    ca.checked=list.length>0&&list.every(v=>selected.has(v));
+    ok.disabled=selected.size===0;
+  }
+  ms.addEventListener("input",()=>{
+    const q=ms.value.trim().toLowerCase();
+    list=q?vals.filter(v=>(v===""?"(kosong)":v.toLowerCase()).includes(q)):vals;
+    selected=q?new Set(list):new Set(base);
+    renderList();
+  });
+  ca.addEventListener("change",()=>{
+    if(ca.checked)list.forEach(v=>selected.add(v));else list.forEach(v=>selected.delete(v));
+    renderList();
+  });
+  le.addEventListener("change",e=>{
+    const i=e.target.dataset.i;if(i===undefined)return;
+    const v=list[+i];e.target.checked?selected.add(v):selected.delete(v);
+    ca.checked=list.every(x=>selected.has(x));ok.disabled=selected.size===0;
+  });
+  ok.addEventListener("click",()=>{
+    if(selected.size===vals.length)delete sh.filters[c];else sh.filters[c]=new Set(selected);
+    closeMenu();applyFilters();
+  });
+  menu.addEventListener("click",e=>{
+    const a=e.target.closest("[data-a]");if(!a)return;
+    const k=a.dataset.a;
+    if(k==="asc"||k==="desc"){sh.sort={c,dir:k==="asc"?1:-1};closeMenu();applyFilters();}
+    else if(k==="nosort"){sh.sort=null;closeMenu();applyFilters();}
+    else if(k==="clear"){delete sh.filters[c];closeMenu();applyFilters();}
+    else closeMenu();
+  });
+  renderList();
+  const r=anchor.getBoundingClientRect(),mw=menu.offsetWidth,mh=menu.offsetHeight;
+  menu.style.left=Math.max(8,Math.min(r.left,innerWidth-mw-8))+"px";
+  menu.style.top=Math.max(8,Math.min(r.bottom+4,innerHeight-mh-8))+"px";
+  if(!matchMedia("(pointer:coarse)").matches)ms.focus();
+}
+document.addEventListener("pointerdown",e=>{if(menu&&!menu.contains(e.target)&&!e.target.closest(".h"))closeMenu();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
+
+/* ---------- Bandingkan data kemarin vs hari ini ---------- */
+/* Baris dicocokkan lewat "kunci" (default: location + description + exp_date).
+   Jika satu kunci muncul n kali kemarin dan m kali hari ini (m<n), sisanya dianggap hilang. */
+let cmp=null; // {prv,tdy,mode,pname,cname}
+const DEFAULT_KEY="location, description, exp_date";
+let cmpKey=lsGet("cmpkey2");if(!cmpKey)cmpKey=DEFAULT_KEY;
+function runCompare(){
+  const names=cmpKey.split(",").map(x=>x.trim()).filter(Boolean);
+  if(!names.length)throw new Error("Kolom kunci kosong.");
+  const kc=(sh,fn)=>names.map(n=>{
+    const c=sh.hdr.findIndex(h=>norm(h)===norm(n));
+    if(c<0)throw new Error('Kolom kunci "'+n+'" tidak ada di file '+fn+'. Cek tombol Kolom (header yang dimuat) atau Kunci.');
+    return c;
+  });
+  const mk=(row,cols)=>cols.map(c=>(row[c]||"").trim().toLowerCase()).join("\u0001");
+  const {prv,tdy}=cmp;
+  tdy.forEach(cs=>{cs.neu=new Uint8Array(cs.nr).fill(1);cs.same=new Uint8Array(cs.nr);});
+  prv.forEach((ps,i)=>{
+    ps.miss=new Uint8Array(ps.nr);
+    const pk=kc(ps,cmp.pname);
+    const cs=tdy.find(x=>x.name===ps.name)||tdy[i]||null;
+    if(!cs){ps.miss.fill(1);return;}
+    const ck=kc(cs,cmp.cname);
+    const A=new Map(),C=new Map();
+    for(let r=0;r<cs.nr;r++){const k=mk(cs.rows[r],ck);A.set(k,(A.get(k)||0)+1);}
+    for(let r=0;r<ps.nr;r++){const k=mk(ps.rows[r],pk);C.set(k,(C.get(k)||0)+1);}
+    for(let r=0;r<ps.nr;r++){const k=mk(ps.rows[r],pk),n=A.get(k)||0;if(n>0)A.set(k,n-1);else ps.miss[r]=1;}
+    for(let r=0;r<cs.nr;r++){const k=mk(cs.rows[r],ck),n=C.get(k)||0;if(n>0){C.set(k,n-1);cs.same[r]=1;cs.neu[r]=0;}}
+  });
+}
+function cmpFilter(ps){
+  const sel=new Uint8Array(ps.nr);
+  const cc=ps.hdr.findIndex(h=>norm(h)==="commqty"),uc=ps.hdr.findIndex(h=>norm(h)==="usage");
+  const needC=$("cComm").checked,needR=$("cRes").checked;
+  for(let r=0;r<ps.nr;r++){
+    if(!ps.miss[r])continue;
+    if(needC&&cc>=0){const v=parseFloat(ps.rows[r][cc]);if(!(v>0))continue;}
+    if(needR&&uc>=0&&(ps.rows[r][uc]||"").trim().toLowerCase()!=="reserve")continue;
+    sel[r]=1;
+  }
+  return sel;
+}
+function cmpSum(bk,f){return bk.reduce((a,s)=>{const x=s[f];if(x)for(let i=0;i<x.length;i++)a+=x[i];return a;},0);}
+function updateCmpUI(){
+  const o=$("cMode").options,fm=n=>n.toLocaleString("id-ID");
+  o[0].textContent="Hilang: ada kemarin, tidak ada hari ini ("+fm(cmpSum(cmp.prv,"sel"))+")";
+  o[1].textContent="Masih ada: ada di kedua file ("+fm(cmpSum(cmp.tdy,"same"))+")";
+  o[2].textContent="Baru: hanya ada hari ini ("+fm(cmpSum(cmp.tdy,"neu"))+")";
+  $("cMode").value=cmp.mode;$("cHil").style.display=cmp.mode==="hilang"?"flex":"none";
+  $("cInfo").textContent="Kemarin: "+cmp.pname+"  ·  Hari ini: "+cmp.cname+"  ·  Kunci: "+cmpKey;
+  $("cbar").style.display="flex";
+}
+function showBook(){
+  cur=null;sel=null;si=0;book.forEach(layoutCols);
+  $("sheets").style.display=book.length>1?"flex":"none";
+  buildTabs();fillColSelect();setSheet(0);
+  if($("q").value.trim())doSearch();
+  showTab("v");
+}
+function applyCmp(){
+  const m=cmp.mode,src=m==="hilang"?cmp.prv:cmp.tdy;
+  cmp.prv.forEach(s=>{s.sel=cmpFilter(s);});
+  cmp.prv.forEach(s=>{s.cmpSel=null;});cmp.tdy.forEach(s=>{s.cmpSel=null;});
+  src.forEach(s=>{s.cmpSel=m==="hilang"?s.sel:m==="baru"?s.neu:s.same;});
+  book=src;
+  book.forEach(runCheck);book.forEach(rebuildView);
+  $("title").textContent="Bandingkan · "+(m==="hilang"?cmp.pname:cmp.cname);
+  showBook();updateCmpUI();
+}
+function plainTitle(){
+  $("title").textContent=cmp?"Bandingkan · "+(cmp.mode==="hilang"?cmp.pname:cmp.cname):(lastFile?lastFile.name:"Pembaca Excel Offline");
+}
+$("filePrev").onchange=async e=>{
+  const f=e.target.files[0];e.target.value="";
+  if(!f||!book)return;
+  err("");
+  try{
+    const old=cmp,tdy=old?old.tdy:book,cname=old?old.cname:(lastFile?lastFile.name:"hari ini");
+    $("title").textContent="Membaca "+f.name+"…";
+    await new Promise(r=>setTimeout(r,20));
+    const prv=await loadBook(await f.arrayBuffer(),p=>{$("title").textContent="Membaca "+f.name+" … "+Math.round(p*100)+"%";});
+    cmp={prv,tdy,mode:"hilang",pname:f.name,cname};
+    try{runCompare();}catch(x){cmp=old;throw x;}
+    applyCmp();
+  }catch(x){plainTitle();err((x&&x.message)||String(x));}
+};
+$("cComm").onchange=$("cRes").onchange=()=>{if(cmp)applyCmp();};
+$("cMode").onchange=()=>{if(!cmp)return;cmp.mode=$("cMode").value;applyCmp();};
+$("cKey").onclick=()=>{
+  if(!cmp)return;
+  const v=prompt('Kolom kunci untuk mencocokkan baris kemarin vs hari ini (nama header, pisahkan koma).\nSatu baris dianggap "sama" jika semua kolom ini sama.\nContoh tanpa exp_date: location, description',cmpKey);
+  if(v===null||!v.trim())return;
+  const old=cmpKey;cmpKey=v;
+  try{runCompare();lsSet("cmpkey2",v);err("");applyCmp();}
+  catch(x){cmpKey=old;try{runCompare();}catch(_){}err((x&&x.message)||String(x));}
+};
+$("cOff").onclick=()=>{
+  if(!cmp)return;
+  const t=cmp.tdy;
+  cmp.prv.forEach(s=>{s.cmpSel=null;});t.forEach(s=>{s.cmpSel=null;});
+  book=t;cmp=null;$("cbar").style.display="none";
+  book.forEach(rebuildView);plainTitle();showBook();
+};
+
+/* ---------- Gambar (PNG dari data yang tampil) ---------- */
+const IMGCOLS_DEF="location, description, s_ava_qty, comm_qty, transc_date, exp_date, usage";
+let imgCols=lsGet("imgcols");if(imgCols===null)imgCols=IMGCOLS_DEF;
+let imgUrls=[];
+function wrapLines(ctx,t,w){
+  t=String(t||"");const res=[];let line="";
+  const put=x=>{for(const ch of x){if(line&&ctx.measureText(line+ch).width>w){res.push(line);line="";}line+=ch;}};
+  for(const tok of t.split(/(?<=[\s\-\/])/)){
+    if(!line||ctx.measureText(line+tok).width<=w){
+      if(ctx.measureText(line+tok).width<=w)line+=tok;else put(tok);
+    }else{
+      res.push(line);line="";
+      if(ctx.measureText(tok).width<=w)line=tok;else put(tok);
+    }
+  }
+  res.push(line);
+  return res.map(x=>x.trimEnd());
+}
+function fitWidths(nat,avail){
+  let w=nat.slice();const sum=a=>a.reduce((x,y)=>x+y,0);
+  if(sum(nat)>avail){
+    let lo=60,hi=Math.max(...nat);
+    for(let k=0;k<30;k++){const mid=(lo+hi)/2;if(sum(nat.map(v=>Math.min(v,mid)))>avail)hi=mid;else lo=mid;}
+    w=nat.map(v=>Math.floor(Math.min(v,lo)));
+  }
+  const t=sum(w);
+  if(t!==avail&&t>0){w=w.map(v=>Math.floor(v*avail/t));}
+  w[w.indexOf(Math.max(...w))]+=avail-sum(w);
+  return w;
+}
+function baseName(){return ((lastFile&&lastFile.name||"data").replace(/\.xlsx?m?$/i,""))+(cmp?"_bandingkan":"_data");}
+async function makeImages(){
+  const s=curSheet();
+  const names=imgCols.split(",").map(norm).filter(Boolean);
+  let cols=[];
+  for(const n of names){const c=s.hdr.findIndex(h=>norm(h)===n);if(c>=0&&!cols.includes(c))cols.push(c);}
+  if(!cols.length)cols=s.hdr.map((_,i)=>i);
+  const CAP=1500,all=s.view,N=all.length,rows=all.slice(0,CAP);
+  const W=1100,FS=22,LH=28,PX=12,PY=7;
+  const FONT=FS+"px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif",BFONT="bold "+FONT;
+  const m=document.createElement("canvas").getContext("2d");
+  m.font=BFONT;
+  const noW=Math.ceil(m.measureText(String(rows.length)).width)+2*PX+4;
+  const avail=W-noW;
+  const nat=cols.map(c=>Math.ceil(m.measureText(s.hdr[c]).width)+2*PX);
+  m.font=FONT;
+  for(const r of rows.slice(0,600)){const row=s.rows[r];cols.forEach((c,j)=>{const v=row[c];if(v){const x=Math.ceil(m.measureText(v).width)+2*PX;if(x>nat[j])nat[j]=x;}});}
+  const cw=fitWidths(nat,avail);
+  m.font=BFONT;
+  const hl=cols.map((c,j)=>wrapLines(m,s.hdr[c],cw[j]-2*PX));
+  const hh=Math.max(...hl.map(a=>a.length))*LH+2*PY;
+  m.font=FONT;
+  const cells=rows.map(r=>cols.map((c,j)=>wrapLines(m,s.rows[r][c]||"",cw[j]-2*PX)));
+  const rh=cells.map(cs=>Math.max(...cs.map(a=>a.length))*LH+2*PY);
+  // banner
+  const modeLbl={hilang:"HILANG: ada kemarin, tidak ada hari ini",tetap:"MASIH ADA: ada di kedua file",baru:"BARU: hanya ada hari ini"};
+  const t1=cmp?modeLbl[cmp.mode]:(lastFile?lastFile.name:"Data");
+  const info=[N.toLocaleString("id-ID")+" baris"+(N>CAP?" (gambar memuat "+CAP+" pertama)":"")+" · "+new Date().toLocaleString("id-ID")];
+  if(cmp)info.push("Kemarin: "+cmp.pname+" · Hari ini: "+cmp.cname);
+  if(cmp&&cmp.mode==="hilang"){const f=[];if($("cComm").checked)f.push("kemarin COMM_QTY > 0");if($("cRes").checked)f.push("USAGE Reserve");if(f.length)info.push("Filter: "+f.join(" + "));}
+  const tot=$("tot").textContent;if(tot)info.push(tot);
+  m.font=FONT;
+  const il=info.flatMap(x=>wrapLines(m,x,W-2*PX));
+  const bh=LH+il.length*LH*0.9+2*PY+6;
+  // halaman
+  const MAXH=2400,pages=[];let cur2=[],hcur=bh+hh;
+  rows.forEach((_,i)=>{if(cur2.length&&hcur+rh[i]>MAXH){pages.push(cur2);cur2=[];hcur=hh;}cur2.push(i);hcur+=rh[i];});
+  pages.push(cur2);
+  if(!rows.length)pages[0]=[];
+  const blobs=[];
+  for(let p=0;p<pages.length;p++){
+    const idx=pages[p];
+    let H=(p===0?bh:0)+hh+idx.reduce((a,i)=>a+rh[i],0)+2;
+    const cv=document.createElement("canvas");cv.width=W;cv.height=H;
+    const g=cv.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,W,H);g.textBaseline="middle";
+    let y=0;
+    if(p===0){
+      g.fillStyle="#1f7a4d";g.fillRect(0,0,W,bh);
+      g.fillStyle="#fff";g.font=BFONT;g.fillText(t1,PX,PY+LH/2+2);
+      g.font=(FS-2)+"px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+      il.forEach((x,k)=>g.fillText(x,PX,PY+LH+LH*0.9*k+LH*0.45+4));
+      y=bh;
+    }
+    const xs=[];let a=noW;cols.forEach((_,j)=>{xs.push(a);a+=cw[j];});
+    // header
+    g.fillStyle="#dfe5ec";g.fillRect(0,y,W,hh);
+    g.fillStyle="#1d2330";g.font=BFONT;
+    g.fillText("No",PX/2+2,y+hh/2);
+    hl.forEach((ls,j)=>ls.forEach((x,k)=>g.fillText(x,xs[j]+PX,y+PY+LH*k+LH/2)));
+    y+=hh;
+    idx.forEach((i,n)=>{
+      const r=rows[i],row=s.rows[r];
+      if(n%2)g.fillStyle="#f3f5f8";else g.fillStyle="#fff";
+      g.fillRect(0,y,W,rh[i]);
+      g.font=FONT;g.fillStyle="#6b7385";g.fillText(String(i+1),PX/2+2,y+PY+LH/2);
+      cells[i].forEach((ls,j)=>{
+        const c=cols[j];let col="#1d2330",bold=false;
+        if(c===s.expCol){const x=expCls(s,r,todayN());if(x==="x0"){col="#c62828";bold=true;}else if(x==="x1"){col="#d9730d";bold=true;}else if(x==="x2"){col="#a67c00";bold=true;}}
+        if(c===s.chkCol&&row[c]){col="#c62828";}
+        g.fillStyle=col;g.font=bold?BFONT:FONT;
+        ls.forEach((x,k)=>g.fillText(x,xs[j]+PX,y+PY+LH*k+LH/2));
+      });
+      y+=rh[i];
+    });
+    // garis
+    g.strokeStyle="#cfd5dd";g.lineWidth=1;
+    let top=p===0?bh:0;
+    g.beginPath();
+    [noW,...xs.slice(1)].forEach(x=>{g.moveTo(x+.5,top);g.lineTo(x+.5,H);});
+    g.moveTo(0,H-.5);g.lineTo(W,H-.5);g.stroke();
+    blobs.push(await new Promise(r=>cv.toBlob(r,"image/png")));
+  }
+  return blobs;
+}
+async function showImages(){
+  if(!book||!curSheet())return;
+  $("imgv").style.display="block";
+  $("imgb").innerHTML='<p style="padding:16px;color:#ddd">Membuat gambar…</p>';
+  await new Promise(r=>setTimeout(r,30));
+  try{
+    const blobs=await makeImages();
+    imgUrls.forEach(u=>URL.revokeObjectURL(u));
+    imgUrls=blobs.map(b=>URL.createObjectURL(b));
+    $("imgb").innerHTML=imgUrls.map((u,i)=>`<div class="ip"><div class="cap"><span>Halaman ${i+1} / ${imgUrls.length}</span><a class="btn" href="${u}" download="${esc(baseName())}_${i+1}.png">Simpan</a></div><img src="${u}"></div>`).join("");
+  }catch(e){$("imgb").innerHTML='<p style="padding:16px;color:#f88">Gagal membuat gambar: '+esc((e&&e.message)||String(e))+'</p>';}
+}
+$("bImg").onclick=showImages;
+$("imgClose").onclick=()=>{$("imgv").style.display="none";};
+$("imgCols").onclick=()=>{
+  const v=prompt("Kolom yang masuk gambar (nama header, pisahkan koma).\nKosongkan = semua kolom.",imgCols);
+  if(v===null)return;
+  imgCols=v;lsSet("imgcols",v);showImages();
+};
+
+/* ---------- UI ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sc=$("sc"),rowsEl=$("rows"),szEl=$("sz"),hdEl=$("hd");
+const curSheet=()=>book&&book[si];
+
+function showTab(t){
+  $("tLihat").classList.toggle("on",t==="v");$("tCari").classList.toggle("on",t==="s");
+  $("viewTab").classList.toggle("on",t==="v");$("searchTab").classList.toggle("on",t==="s");
+  closeMenu();
+  if(t==="v") render(); else $("q").focus();
+}
+$("tLihat").onclick=()=>showTab("v");
+$("tCari").onclick=()=>showTab("s");
+function err(m){const e=$("err");e.textContent=m;e.style.display=m?"block":"none";}
+
+async function openFile(f){
+  err("");lastFile=f;closeMenu();cmp=null;$("cbar").style.display="none";
+  try{
+    $("title").textContent="Membaca "+f.name+"…";
+    await new Promise(r=>setTimeout(r,20));
+    expRange=null;$("oExp").value="";onlyFlag=false;$("oFlag").checked=false;
+    book=await loadBook(await f.arrayBuffer(),p=>{$("title").textContent="Membaca "+f.name+" … "+Math.round(p*100)+"%";});
+    const n=book.reduce((a,s)=>a+s.nr,0);
+    $("title").textContent=f.name+" · "+n.toLocaleString("id-ID")+" baris";
+    cur=null;sel=null;si=0;
+    $("empty").style.display="none";
+    $("fbar").style.display="flex";$("bPrev").style.display="";
+    $("sheets").style.display=book.length>1?"flex":"none";$("bar").style.display="flex";sc.style.display="block";
+    buildTabs();fillColSelect();setSheet(0);
+    results=[];matches=new Map();$("res").innerHTML="";
+    $("sum").textContent="Ketik kata yang dicari. Filter di atas ikut berlaku.";
+    if($("q").value) doSearch();
+    showTab("v");
+  }catch(e){
+    $("title").textContent="Pembaca Excel Offline";
+    err((e&&e.message)||String(e));
+  }
+}
+$("file").onchange=e=>{if(e.target.files[0]) openFile(e.target.files[0]); e.target.value="";};
+$("bCols").onclick=()=>{
+  const v=prompt("Kolom yang ditampilkan (nama header, pisahkan dengan koma).\nKosongkan = tampilkan semua kolom.",colSetting);
+  if(v===null)return;
+  colSetting=v;lsSet("cols2",v);
+  if(lastFile) openFile(lastFile);
+};
+let dc=0;
+addEventListener("dragenter",e=>{e.preventDefault();dc++;$("drop").style.display="flex";});
+addEventListener("dragleave",e=>{e.preventDefault();if(--dc<=0){dc=0;$("drop").style.display="none";}});
+addEventListener("dragover",e=>e.preventDefault());
+addEventListener("drop",e=>{e.preventDefault();dc=0;$("drop").style.display="none";if(e.dataTransfer.files[0]) openFile(e.dataTransfer.files[0]);});
+
+function buildTabs(){
+  const box=$("sheets");box.innerHTML="";
+  book.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s.name;
+    b.onclick=()=>{closeMenu();setSheet(i);};box.appendChild(b);});
+}
+function fillColSelect(){
+  const o=$("oCol");o.innerHTML='<option value="-1">Semua kolom</option>';
+  book[0].hdr.forEach((n,i)=>{const op=document.createElement("option");op.value=i;op.textContent=n;o.appendChild(op);});
+}
+function setSheet(i){
+  si=i;const s=curSheet();
+  [...$("sheets").children].forEach((b,j)=>b.classList.toggle("on",j===i));
+  szEl.style.height=(s.view.length*RH)+"px";
+  const tw=RNW+s.tw;szEl.style.width=tw+"px";
+  let h='<div class="rn"></div>';
+  s.hdr.forEach((n,c)=>{
+    const so=s.sort&&s.sort.c===c?(s.sort.dir>0?" ▲":" ▼"):"";
+    h+=`<div class="h${s.filters[c]?" act":""}" data-c="${c}" style="width:${s.w[c]}px" title="${esc(n)} — klik untuk filter/urutkan">${esc(n)}${so}<span class="fb">▾</span></div>`;
+  });
+  hdEl.innerHTML=h;hdEl.style.width=tw+"px";rowsEl.style.width=tw+"px";
+  sc.scrollTop=0;sc.scrollLeft=0;
+  if(!(sel&&sel.s===i)){$("ref").textContent="";$("val").textContent="";}
+  updateFbar();render();
+}
+hdEl.addEventListener("click",e=>{
+  const h=e.target.closest(".h");if(!h)return;
+  const c=+h.dataset.c;
+  if(menu&&menuCol===c){closeMenu();return;}
+  openMenu(c,h);
+});
+function expCls(s,r,T){
+  const d=s.exp[r]-T;
+  if(!(d===d))return "";
+  return d<0?"x0":d<=30?"x1":d<=90?"x2":"";
+}
+function render(){
+  const s=curSheet();if(!s||!sc.clientHeight)return;
+  const V=s.view,T=todayN();
+  const st=Math.max(0,Math.floor(sc.scrollTop/RH)-2);
+  const en=Math.min(V.length,st+Math.ceil(sc.clientHeight/RH)+6);
+  const ms=matches.get(si);
+  let h="";
+  for(let i=st;i<en;i++){
+    const r=V[i],row=s.rows[r];
+    h+=`<div class="r"><div class="rn">${r+1}</div>`;
+    for(let c=0;c<s.nc;c++){
+      let cl="c";
+      if(ms&&ms.has(r*1000+c))cl+=" m";
+      if(cur&&cur.s===si&&cur.r===r&&cur.c===c)cl+=" cur";
+      else if(sel&&sel.s===si&&sel.r===r&&sel.c===c)cl+=" sel";
+      if(c===s.expCol){const x=expCls(s,r,T);if(x)cl+=" "+x;}
+      else if(c===s.chkCol&&row[c])cl+=" x0";
+      h+=`<div class="${cl}" data-r="${r}" data-c="${c}" style="width:${s.w[c]}px">${row[c]?esc(row[c]):""}</div>`;
+    }
+    h+="</div>";
+  }
+  rowsEl.style.top=(st*RH)+"px";
+  rowsEl.innerHTML=h;
+}
+let raf=0;
+sc.addEventListener("scroll",()=>{if(menu&&performance.now()-menuT>600)closeMenu();if(!raf)raf=requestAnimationFrame(()=>{raf=0;render();});});
+addEventListener("resize",render);
+rowsEl.addEventListener("click",e=>{
+  const c=e.target.closest(".c");if(!c)return;
+  selectCell(si,+c.dataset.r,+c.dataset.c);
+});
+function setBar(s,r,c){
+  const sh=book[s],t=sh.rows[r][c]||"";
+  $("ref").textContent=sh.hdr[c]+" · baris "+(r+1);$("val").textContent=t;$("val").title=t;
+}
+function selectCell(s,r,c){sel={s,r,c};cur=null;setBar(s,r,c);render();}
+function goto(s,r,c){
+  showTab("v");
+  if(s!==si)setSheet(s);
+  const sh=book[s],pos=sh.pos[r];
+  if(pos<0)return;
+  cur={s,r,c};sel=null;setBar(s,r,c);
+  sc.scrollTop=Math.max(0,pos*RH-(sc.clientHeight-HH)/2);
+  sc.scrollLeft=Math.max(0,RNW+sh.x[c]-sc.clientWidth/3);
+  render();
+}
+
+/* ---------- Pencarian (per baris, hanya pada baris yang lolos filter) ---------- */
+function doSearch(){
+  const raw=$("q").value;
+  results=[];matches=new Map();shown=0;
+  if(!book){$("sum").textContent="Buka file terlebih dahulu.";return;}
+  const q=raw.trim();
+  if(!q){$("sum").textContent="Ketik kata yang dicari. Filter di atas ikut berlaku.";$("res").innerHTML="";render();return;}
+  const cs=$("oCase").checked,whole=$("oWhole").checked,all=$("oAll").checked,col=+$("oCol").value;
+  const terms=(whole?[q]:q.split(/\s+/)).map(t=>cs?t:t.toLowerCase());
+  const T=terms.length;
+  let total=0,capped=false;
+  const list=all?book.map((_,i)=>i):[si];
+  for(const i of list){
+    const sh=book[i],set=new Set(),nc=sh.nc,vw=sh.view;
+    const c0=col>=0&&col<nc?col:0,c1=col>=0&&col<nc?col+1:nc;
+    for(let k=0;k<vw.length&&!capped;k++){
+      const r=vw[k],row=sh.rows[r];
+      let hit=null,ok=true;
+      for(let t=0;t<T&&ok;t++){
+        const term=terms[t];let found=false;
+        for(let c=c0;c<c1;c++){
+          const v=row[c];if(!v)continue;
+          const hy=cs?v:v.toLowerCase();
+          if(whole?hy===term:hy.includes(term)){found=true;(hit||(hit=[])).push(c);}
+        }
+        if(!found)ok=false;
+      }
+      if(ok&&hit){
+        total++;
+        for(const c of hit)set.add(r*1000+c);
+        results.push({s:i,r,c:hit[0]});
+        if(total>=MAXRES)capped=true;
+      }
+    }
+    matches.set(i,set);
+    if(capped)break;
+  }
+  const totalRows=list.reduce((a,i)=>a+book[i].view.length,0);
+  $("sum").textContent=total?`${total.toLocaleString("id-ID")}${capped?"+":""} baris cocok (dari ${totalRows.toLocaleString("id-ID")}${anyFilter()?" baris terfilter":" baris"})`:"Tidak ada hasil.";
+  $("res").innerHTML="";$("res").scrollTop=0;
+  window._terms=terms;window._cs=cs;window._whole=whole;
+  showMore();render();
+}
+function hl(v){
+  const terms=window._terms,cs=window._cs,whole=window._whole;
+  const hy=cs?v:v.toLowerCase();
+  if(whole)return hy===terms[0]?"<mark>"+esc(v)+"</mark>":esc(v);
+  const rg=[];
+  for(const t of terms){let p=0;for(;;){const k=hy.indexOf(t,p);if(k<0)break;rg.push([k,k+t.length]);p=k+t.length;}}
+  if(!rg.length)return esc(v);
+  rg.sort((a,b)=>a[0]-b[0]);
+  let o="",pos=0;
+  for(const [a,b] of rg){if(b<=pos)continue;const s=Math.max(a,pos);o+=esc(v.slice(pos,s))+"<mark>"+esc(v.slice(s,b))+"</mark>";pos=b;}
+  return o+esc(v.slice(pos));
+}
+function showMore(){
+  const box=$("res"),T=todayN();
+  const old=box.querySelector(".more");if(old)old.remove();
+  const end=Math.min(results.length,shown+STEP);
+  let h="";
+  for(let k=shown;k<end;k++){
+    const x=results[k],sh=book[x.s],row=sh.rows[x.r];
+    let kv="";
+    for(let c=0;c<sh.nc;c++) if(row[c]){
+      const ec=c===sh.expCol?expCls(sh,x.r,T):(c===sh.chkCol?"x0":"");
+      kv+=`<div><i>${esc(sh.hdr[c])}</i>${ec?`<span class="${ec}">`:""}${hl(row[c])}${ec?"</span>":""}</div>`;
+    }
+    h+=`<button class="res" data-k="${k}"><span class="loc">Baris ${x.r+1}${book.length>1?" · "+esc(sh.name):""}</span><span class="kv">${kv}</span></button>`;
+  }
+  box.insertAdjacentHTML("beforeend",h);
+  shown=end;
+  if(shown<results.length) box.insertAdjacentHTML("beforeend",`<button class="btn sec more">Tampilkan lebih banyak (${(results.length-shown).toLocaleString("id-ID")} lagi)</button>`);
+}
+let tm=0;
+$("q").addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(doSearch,300);});
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){clearTimeout(tm);doSearch();e.target.blur();}});
+["oAll","oCase","oWhole","oCol"].forEach(id=>$(id).addEventListener("change",doSearch));
+$("res").addEventListener("click",e=>{
+  if(e.target.closest(".more")){showMore();return;}
+  const b=e.target.closest(".res");if(!b)return;
+  const x=results[+b.dataset.k];goto(x.s,x.r,x.c);
+});
+</script>
+<script>
+/* PWA: aktif hanya bila dibuka lewat https (mis. GitHub Pages); dibuka sebagai file lokal tetap jalan biasa */
+if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+  addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});
+}
+</script>
+</body>
+</html>
