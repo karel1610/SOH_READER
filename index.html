@@ -33,16 +33,16 @@ nav button.on{color:var(--ac);border-bottom-color:var(--ac)}
 .fit .h{padding-right:15px;font-size:10px}
 .fit .h .fb{width:14px;right:0;font-size:9px}
 .fit .rn{width:36px;font-size:10px;padding:0}
-#imgv{position:fixed;inset:0;z-index:200;background:#111;color:#fff;display:none;overflow:auto}
-#imgt{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#111;border-bottom:1px solid #333;font-size:12px;color:#bbb}
-#imgb img{width:100%;display:block;background:#fff}
-#imgb .cap{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:13px;color:#ddd}
-#imgb .cap .btn{padding:5px 12px;font-size:13px;text-decoration:none}
 #cbar{display:none;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:7px 12px;background:var(--hl);color:var(--tx);border-bottom:1px solid var(--bd);font-size:13px}
 #cbar select{padding:5px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx);font-size:13px;max-width:100%}
 #cbar .btn{padding:5px 10px;font-size:12px}
 #cbar label{display:flex;gap:4px;align-items:center}
 #cbar #cInfo{flex-basis:100%;font-size:12px;opacity:.8}
+#imgv{position:fixed;inset:0;z-index:200;background:#111;color:#fff;display:none;overflow:auto}
+#imgt{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#111;border-bottom:1px solid #333;font-size:12px;color:#bbb}
+#imgb img{width:100%;display:block;background:#fff}
+#imgb .cap{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:13px;color:#ddd}
+#imgb .cap .btn{padding:5px 12px;font-size:13px;text-decoration:none}
 .x0{color:var(--bad);font-weight:700}.x1{color:var(--warn);font-weight:700}.x2{color:var(--soon);font-weight:700}
 main{flex:1;min-height:0;display:flex;flex-direction:column}
 .tab{flex:1;min-height:0;display:none;flex-direction:column}
@@ -53,7 +53,9 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 #bar b{color:var(--ac);white-space:nowrap}
 #bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 #sheets{display:none;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--bd)}
-#sheets button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:999px;padding:5px 12px;white-space:nowrap;cursor:pointer;font-size:13px}
+#sheets button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:999px;padding:5px 12px;white-space:nowrap;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:8px;max-width:75vw;flex:none}
+#sheets button .tn{overflow:hidden;text-overflow:ellipsis}
+#sheets button .tx{opacity:.75;font-weight:700;padding:0 2px}
 #sheets button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
 #sc{flex:1;min-height:0;overflow:auto;position:relative;background:var(--card);display:none;-webkit-overflow-scrolling:touch}
 #hd{position:sticky;top:0;z-index:3;display:flex;height:28px;background:var(--hd)}
@@ -104,8 +106,9 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
 <header>
   <h1 id="title">Pembaca Excel Offline</h1>
   <button class="btn sec" id="bCols" title="Pilih kolom yang ditampilkan">Kolom</button>
-  <label class="btn sec" id="bPrev" style="display:none" title="Pilih file SOH kemarin untuk dibandingkan dengan file yang sedang terbuka (hari ini)">Bandingkan<input type="file" id="filePrev" accept=".xlsx,.xlsm"></label>
-  <label class="btn">Buka file<input type="file" id="file" accept=".xlsx,.xlsm"></label>
+  <button class="btn sec" id="bCmp" style="display:none" title="Bandingkan dua tab (file) untuk melihat baris yang berbeda">Bandingkan</button>
+  <label class="btn sec" id="bAdd" style="display:none" title="Tambahkan file lain sebagai tab baru">+ File<input type="file" id="fileAdd" accept=".xlsx,.xlsm" multiple></label>
+  <label class="btn">Buka file<input type="file" id="file" accept=".xlsx,.xlsm" multiple></label>
 </header>
 <nav>
   <button id="tLihat" class="on">Lihat</button>
@@ -133,13 +136,17 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
 </div>
 <div id="cbar">
   <b>Bandingkan:</b>
+  <label>Lama <select id="cA"></select></label>
+  <label>Baru <select id="cB"></select></label>
+  <button class="btn sec" id="cSwap" title="Tukar peran tab lama dan baru">Tukar</button>
   <select id="cMode">
-    <option value="hilang">Hilang: ada kemarin, tidak ada hari ini</option>
-    <option value="tetap">Masih ada: ada di kedua file</option>
-    <option value="baru">Baru: hanya ada hari ini</option>
+    <option value="hilang">Hilang / berkurang</option>
+    <option value="tetap">Masih ada</option>
+    <option value="baru">Baru</option>
   </select>
   <span id="cHil" style="display:flex;gap:10px;flex-wrap:wrap">
-    <label><input type="checkbox" id="cComm" checked> kemarin COMM_QTY &gt; 0</label>
+    <label><input type="checkbox" id="cDec" checked> termasuk yang berkurang</label>
+    <label><input type="checkbox" id="cComm" checked> lama: COMM_QTY &gt; 0</label>
     <label><input type="checkbox" id="cRes" checked> hanya USAGE Reserve</label>
   </span>
   <button class="btn sec" id="cKey" title="Kolom yang dipakai untuk mencocokkan baris">Kunci…</button>
@@ -516,6 +523,7 @@ function updateFbar(){
   $("bReset").style.display=anyFilter()?"":"none";
   const has=book.some(x=>x.expCol>=0);
   $("oExp").disabled=!has;$("oExp").title=has?"":"Kolom EXP_DATE tidak ada pada kolom yang ditampilkan";
+  if(cmp&&book[cmp.a]&&book[cmp.a].sel)cmpWarn();
 }
 function afterChange(){
   setSheet(si);
@@ -552,7 +560,7 @@ $("bCsv").onclick=()=>{
   for(const r of s.view)out.push(s.rows[r].map(q).join(";"));
   const blob=new Blob(["﻿"+out.join("\r\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download=((lastFile&&lastFile.name||"data").replace(/\.xlsx?m?$/i,""))+"_filter.csv";
+  a.download=((curSheet()&&curSheet().file||"data").replace(/\.xlsx?m?$/i,""))+"_filter.csv";
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 };
 $("bReset").onclick=()=>{
@@ -633,109 +641,149 @@ function openMenu(c,anchor){
 document.addEventListener("pointerdown",e=>{if(menu&&!menu.contains(e.target)&&!e.target.closest(".h"))closeMenu();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
 
-/* ---------- Bandingkan data kemarin vs hari ini ---------- */
+/* ---------- Bandingkan dua tab ---------- */
 /* Baris dicocokkan lewat "kunci" (default: location + description + exp_date).
-   Jika satu kunci muncul n kali kemarin dan m kali hari ini (m<n), sisanya dianggap hilang. */
-let cmp=null; // {prv,tdy,mode,pname,cname}
+   Bila satu kunci muncul n kali di tab lama dan m kali di tab baru (m<n), sisanya dianggap hilang.
+   BERKURANG = kunci masih ada tetapi total qty (S_AVA_QTY + COMM_QTY) di tab baru lebih kecil. */
+let cmp=null; // {a:indeks tab lama, b:indeks tab baru, mode}
 const DEFAULT_KEY="location, description, exp_date";
 let cmpKey=lsGet("cmpkey2");if(!cmpKey)cmpKey=DEFAULT_KEY;
+function maxTr(sh){ // tgl transaksi terbesar (untuk menebak mana yang lebih baru)
+  const c=sh.hdr.findIndex(h=>norm(h)==="transcdate");
+  if(c<0||!sh.nr)return NaN;
+  let mx=NaN;
+  for(let r=0;r<sh.nr;r++){const m=RE_D.exec(sh.rows[r][c]||"");if(m){const d=Date.UTC(+m[1],+m[2]-1,+m[3])/864e5;if(!(d<=mx))mx=d;}}
+  return mx;
+}
+const qIdx=sh=>["savaqty","commqty"].map(n=>sh.hdr.findIndex(h=>norm(h)===n)).filter(c=>c>=0);
+const sumQ=(row,qc)=>qc.reduce((a,c)=>{const v=parseFloat(row[c]);return a+(v===v?v:0);},0);
+const fq=n=>(Math.round(n*100)/100).toLocaleString("id-ID");
 function runCompare(){
+  const A=book[cmp.a],B=book[cmp.b];
+  if(!A||!B||A===B)throw new Error("Pilih dua tab yang berbeda.");
   const names=cmpKey.split(",").map(x=>x.trim()).filter(Boolean);
   if(!names.length)throw new Error("Kolom kunci kosong.");
-  const kc=(sh,fn)=>names.map(n=>{
+  const kc=sh=>names.map(n=>{
     const c=sh.hdr.findIndex(h=>norm(h)===norm(n));
-    if(c<0)throw new Error('Kolom kunci "'+n+'" tidak ada di file '+fn+'. Cek tombol Kolom (header yang dimuat) atau Kunci.');
+    if(c<0)throw new Error('Kolom kunci "'+n+'" tidak ada di tab "'+sh.name+'". Cek tombol Kolom (header yang dimuat) atau Kunci.');
     return c;
   });
   const mk=(row,cols)=>cols.map(c=>(row[c]||"").trim().toLowerCase()).join("\u0001");
-  const {prv,tdy}=cmp;
-  tdy.forEach(cs=>{cs.neu=new Uint8Array(cs.nr).fill(1);cs.same=new Uint8Array(cs.nr);});
-  prv.forEach((ps,i)=>{
-    ps.miss=new Uint8Array(ps.nr);
-    const pk=kc(ps,cmp.pname);
-    const cs=tdy.find(x=>x.name===ps.name)||tdy[i]||null;
-    if(!cs){ps.miss.fill(1);return;}
-    const ck=kc(cs,cmp.cname);
-    const A=new Map(),C=new Map();
-    for(let r=0;r<cs.nr;r++){const k=mk(cs.rows[r],ck);A.set(k,(A.get(k)||0)+1);}
-    for(let r=0;r<ps.nr;r++){const k=mk(ps.rows[r],pk);C.set(k,(C.get(k)||0)+1);}
-    for(let r=0;r<ps.nr;r++){const k=mk(ps.rows[r],pk),n=A.get(k)||0;if(n>0)A.set(k,n-1);else ps.miss[r]=1;}
-    for(let r=0;r<cs.nr;r++){const k=mk(cs.rows[r],ck),n=C.get(k)||0;if(n>0){C.set(k,n-1);cs.same[r]=1;cs.neu[r]=0;}}
-  });
+  const pk=kc(A),ck=kc(B);
+  A.miss=new Uint8Array(A.nr);A.dec=new Uint8Array(A.nr);
+  B.neu=new Uint8Array(B.nr).fill(1);B.same=new Uint8Array(B.nr);
+  if(A.chgCol==null){ // kolom PERUBAHAN: HILANG / BERKURANG a → b
+    A.hdr.push("PERUBAHAN");A.chgCol=A.nc;A.nc++;
+    for(let r=0;r<A.nr;r++)A.rows[r].push("");
+    if(A.w0)A.w0.push(230);
+    layoutCols(A);
+  }
+  for(let r=0;r<A.nr;r++)A.rows[r][A.chgCol]="";
+  if(B.chgCol!=null)for(let r=0;r<B.nr;r++)B.rows[r][B.chgCol]="";
+  const pq=qIdx(A),cq=qIdx(B);
+  const cntB=new Map(),cntA=new Map(),TA=new Map(),TB=new Map();
+  for(let r=0;r<B.nr;r++){const k=mk(B.rows[r],ck);cntB.set(k,(cntB.get(k)||0)+1);TB.set(k,(TB.get(k)||0)+sumQ(B.rows[r],cq));}
+  for(let r=0;r<A.nr;r++){const k=mk(A.rows[r],pk);cntA.set(k,(cntA.get(k)||0)+1);TA.set(k,(TA.get(k)||0)+sumQ(A.rows[r],pq));}
+  for(let r=0;r<A.nr;r++){
+    const k=mk(A.rows[r],pk),n=cntB.get(k)||0;
+    if(n>0){
+      cntB.set(k,n-1);
+      const ta=TA.get(k),tb=TB.get(k);
+      if(pq.length&&cq.length&&tb<ta-1e-9){A.dec[r]=1;A.rows[r][A.chgCol]="BERKURANG "+fq(ta)+" → "+fq(tb)+" ("+fq(tb-ta)+")";}
+    }else{A.miss[r]=1;A.rows[r][A.chgCol]="HILANG";}
+  }
+  for(let r=0;r<B.nr;r++){const k=mk(B.rows[r],ck),n=cntA.get(k)||0;if(n>0){cntA.set(k,n-1);B.same[r]=1;B.neu[r]=0;}}
 }
-function cmpFilter(ps){
-  const sel=new Uint8Array(ps.nr);
-  const cc=ps.hdr.findIndex(h=>norm(h)==="commqty"),uc=ps.hdr.findIndex(h=>norm(h)==="usage");
-  const needC=$("cComm").checked,needR=$("cRes").checked;
-  for(let r=0;r<ps.nr;r++){
-    if(!ps.miss[r])continue;
-    if(needC&&cc>=0){const v=parseFloat(ps.rows[r][cc]);if(!(v>0))continue;}
-    if(needR&&uc>=0&&(ps.rows[r][uc]||"").trim().toLowerCase()!=="reserve")continue;
+function cmpFilter(A){
+  const sel=new Uint8Array(A.nr);
+  const cc=A.hdr.findIndex(h=>norm(h)==="commqty"),uc=A.hdr.findIndex(h=>norm(h)==="usage");
+  const needC=$("cComm").checked,needR=$("cRes").checked,needD=$("cDec").checked;
+  for(let r=0;r<A.nr;r++){
+    if(!(A.miss[r]||(needD&&A.dec[r])))continue;
+    if(needC&&cc>=0){const v=parseFloat(A.rows[r][cc]);if(!(v>0))continue;}
+    if(needR&&uc>=0&&(A.rows[r][uc]||"").trim().toLowerCase()!=="reserve")continue;
     sel[r]=1;
   }
   return sel;
 }
-function cmpSum(bk,f){return bk.reduce((a,s)=>{const x=s[f];if(x)for(let i=0;i<x.length;i++)a+=x[i];return a;},0);}
+function cmpSum(x){let a=0;if(x)for(let i=0;i<x.length;i++)a+=x[i];return a;}
 function updateCmpUI(){
-  const o=$("cMode").options,fm=n=>n.toLocaleString("id-ID");
-  o[0].textContent="Hilang: ada kemarin, tidak ada hari ini ("+fm(cmpSum(cmp.prv,"sel"))+")";
-  o[1].textContent="Masih ada: ada di kedua file ("+fm(cmpSum(cmp.tdy,"same"))+")";
-  o[2].textContent="Baru: hanya ada hari ini ("+fm(cmpSum(cmp.tdy,"neu"))+")";
+  const A=book[cmp.a],B=book[cmp.b],o=$("cMode").options,fm=n=>n.toLocaleString("id-ID");
+  o[0].textContent="Hilang / berkurang: ada di "+A.name+", hilang atau berkurang di "+B.name+" ("+fm(cmpSum(A.sel))+")";
+  o[1].textContent="Masih ada: ada di "+A.name+" dan "+B.name+" ("+fm(cmpSum(B.same))+")";
+  o[2].textContent="Baru: hanya ada di "+B.name+", tidak ada di "+A.name+" ("+fm(cmpSum(B.neu))+")";
   $("cMode").value=cmp.mode;$("cHil").style.display=cmp.mode==="hilang"?"flex":"none";
-  $("cInfo").textContent="Kemarin: "+cmp.pname+"  ·  Hari ini: "+cmp.cname+"  ·  Kunci: "+cmpKey;
+  $("cA").value=cmp.a;$("cB").value=cmp.b;
+  cmpWarn();
   $("cbar").style.display="flex";
 }
-function showBook(){
-  cur=null;sel=null;si=0;book.forEach(layoutCols);
-  $("sheets").style.display=book.length>1?"flex":"none";
-  buildTabs();fillColSelect();setSheet(0);
-  if($("q").value.trim())doSearch();
-  showTab("v");
+function cmpWarn(){ // beri tahu bila filter lain (kolom/exp) menyembunyikan sebagian hasil
+  const A=book[cmp.a],B=book[cmp.b],m=cmp.mode;
+  if(!A||!B||!A.sel)return;
+  const show=m==="hilang"?A:B,want=m==="hilang"?cmpSum(A.sel):m==="baru"?cmpSum(B.neu):cmpSum(B.same);
+  const w=show.view.length<want?"  ·  ⚠ Hanya "+show.view.length.toLocaleString("id-ID")+" dari "+want.toLocaleString("id-ID")+" baris tampil karena ada filter lain aktif. Tekan Reset filter.":"";
+  $("cInfo").textContent="Kunci pencocokan: "+cmpKey+w;
 }
 function applyCmp(){
-  const m=cmp.mode,src=m==="hilang"?cmp.prv:cmp.tdy;
-  cmp.prv.forEach(s=>{s.sel=cmpFilter(s);});
-  cmp.prv.forEach(s=>{s.cmpSel=null;});cmp.tdy.forEach(s=>{s.cmpSel=null;});
-  src.forEach(s=>{s.cmpSel=m==="hilang"?s.sel:m==="baru"?s.neu:s.same;});
-  book=src;
-  book.forEach(runCheck);book.forEach(rebuildView);
-  $("title").textContent="Bandingkan · "+(m==="hilang"?cmp.pname:cmp.cname);
-  showBook();updateCmpUI();
+  const A=book[cmp.a],B=book[cmp.b],m=cmp.mode;
+  book.forEach(t=>{t.cmpSel=null;});
+  A.sel=cmpFilter(A);
+  const show=m==="hilang"?A:B;
+  show.cmpSel=m==="hilang"?A.sel:m==="baru"?B.neu:B.same;
+  book.forEach(rebuildView);
+  cur=null;sel=null;si=book.indexOf(show);
+  [...$("sheets").children].forEach((b,j)=>b.classList.toggle("on",j===si));
+  setSheet(si);updateCmpUI();
+  if($("q").value.trim())doSearch();
 }
-function plainTitle(){
-  $("title").textContent=cmp?"Bandingkan · "+(cmp.mode==="hilang"?cmp.pname:cmp.cname):(lastFile?lastFile.name:"Pembaca Excel Offline");
+function cmpOff(quiet){
+  if(!cmp)return;
+  cmp=null;
+  book.forEach(t=>{t.cmpSel=null;if(t.chgCol!=null)for(let r=0;r<t.nr;r++)t.rows[r][t.chgCol]="";});
+  $("cbar").style.display="none";
+  if(quiet)return;
+  book.forEach(rebuildView);setSheet(si);
 }
-$("filePrev").onchange=async e=>{
-  const f=e.target.files[0];e.target.value="";
-  if(!f||!book)return;
+function fillCmpSel(){
+  for(const id of ["cA","cB"]){
+    const sl=$(id);sl.innerHTML="";
+    book.forEach((t,i)=>{const o=document.createElement("option");o.value=i;o.textContent=t.name;sl.appendChild(o);});
+  }
+}
+function tryCmp(next){ // jalankan perbandingan; bila gagal, kembali ke keadaan sebelumnya
+  const old=cmp;cmp=next;
+  try{runCompare();err("");applyCmp();return true;}
+  catch(x){
+    cmp=old;
+    if(old){try{runCompare();applyCmp();}catch(_){}}
+    err((x&&x.message)||String(x));return false;
+  }
+}
+$("bCmp").onclick=()=>{
+  if(!book||book.length<2){err("Buka minimal 2 file (Buka file atau + File) untuk dibandingkan.");return;}
+  if(cmp){cmpOff();return;}
   err("");
-  try{
-    const old=cmp,tdy=old?old.tdy:book,cname=old?old.cname:(lastFile?lastFile.name:"hari ini");
-    $("title").textContent="Membaca "+f.name+"…";
-    await new Promise(r=>setTimeout(r,20));
-    const prv=await loadBook(await f.arrayBuffer(),p=>{$("title").textContent="Membaca "+f.name+" … "+Math.round(p*100)+"%";});
-    cmp={prv,tdy,mode:"hilang",pname:f.name,cname};
-    try{runCompare();}catch(x){cmp=old;throw x;}
-    applyCmp();
-  }catch(x){plainTitle();err((x&&x.message)||String(x));}
+  let a=book.length-2,b=book.length-1;
+  const da=maxTr(book[a]),db=maxTr(book[b]);
+  if(da===da&&db===db&&da>db)[a,b]=[b,a]; // tgl transaksi terbaru menentukan mana yang baru
+  expRange=null;$("oExp").value="";onlyFlag=false;$("oFlag").checked=false;
+  book.forEach(t=>{t.filters={};t.sort=null;}); // filter lama jangan menyembunyikan hasil
+  fillCmpSel();
+  tryCmp({a,b,mode:"hilang"});
 };
-$("cComm").onchange=$("cRes").onchange=()=>{if(cmp)applyCmp();};
-$("cMode").onchange=()=>{if(!cmp)return;cmp.mode=$("cMode").value;applyCmp();};
+$("cA").onchange=()=>{if(cmp)tryCmp({...cmp,a:+$("cA").value});};
+$("cB").onchange=()=>{if(cmp)tryCmp({...cmp,b:+$("cB").value});};
+$("cSwap").onclick=()=>{if(cmp)tryCmp({...cmp,a:cmp.b,b:cmp.a});};
+$("cMode").onchange=()=>{if(cmp){cmp.mode=$("cMode").value;applyCmp();}};
+$("cComm").onchange=$("cRes").onchange=$("cDec").onchange=()=>{if(cmp)applyCmp();};
 $("cKey").onclick=()=>{
   if(!cmp)return;
-  const v=prompt('Kolom kunci untuk mencocokkan baris kemarin vs hari ini (nama header, pisahkan koma).\nSatu baris dianggap "sama" jika semua kolom ini sama.\nContoh tanpa exp_date: location, description',cmpKey);
+  const v=prompt('Kolom kunci untuk mencocokkan baris tab lama vs baru (nama header, pisahkan koma).\nSatu baris dianggap "sama" jika semua kolom ini sama.\nContoh tanpa exp_date: location, description',cmpKey);
   if(v===null||!v.trim())return;
   const old=cmpKey;cmpKey=v;
-  try{runCompare();lsSet("cmpkey2",v);err("");applyCmp();}
-  catch(x){cmpKey=old;try{runCompare();}catch(_){}err((x&&x.message)||String(x));}
+  if(tryCmp({...cmp}))lsSet("cmpkey2",v);else{cmpKey=old;}
 };
-$("cOff").onclick=()=>{
-  if(!cmp)return;
-  const t=cmp.tdy;
-  cmp.prv.forEach(s=>{s.cmpSel=null;});t.forEach(s=>{s.cmpSel=null;});
-  book=t;cmp=null;$("cbar").style.display="none";
-  book.forEach(rebuildView);plainTitle();showBook();
-};
+$("cOff").onclick=()=>cmpOff();
 
 /* ---------- Gambar (PNG dari data yang tampil) ---------- */
 const IMGCOLS_DEF="location, description, s_ava_qty, comm_qty, transc_date, exp_date, usage";
@@ -767,13 +815,15 @@ function fitWidths(nat,avail){
   w[w.indexOf(Math.max(...w))]+=avail-sum(w);
   return w;
 }
-function baseName(){return ((lastFile&&lastFile.name||"data").replace(/\.xlsx?m?$/i,""))+(cmp?"_bandingkan":"_data");}
+function baseName(){const c=curSheet();return ((c&&c.file||"data").replace(/\.xlsx?m?$/i,""))+"_data";}
 async function makeImages(){
   const s=curSheet();
   const names=imgCols.split(",").map(norm).filter(Boolean);
   let cols=[];
   for(const n of names){const c=s.hdr.findIndex(h=>norm(h)===n);if(c>=0&&!cols.includes(c))cols.push(c);}
   if(!cols.length)cols=s.hdr.map((_,i)=>i);
+  const inCmp=!!(cmp&&s.cmpSel);
+  if(inCmp&&cmp.mode==="hilang"&&s.chgCol!=null&&!cols.includes(s.chgCol))cols.push(s.chgCol);
   const CAP=1500,all=s.view,N=all.length,rows=all.slice(0,CAP);
   const W=1100,FS=22,LH=28,PX=12,PY=7;
   const FONT=FS+"px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif",BFONT="bold "+FONT;
@@ -792,11 +842,13 @@ async function makeImages(){
   const cells=rows.map(r=>cols.map((c,j)=>wrapLines(m,s.rows[r][c]||"",cw[j]-2*PX)));
   const rh=cells.map(cs=>Math.max(...cs.map(a=>a.length))*LH+2*PY);
   // banner
-  const modeLbl={hilang:"HILANG: ada kemarin, tidak ada hari ini",tetap:"MASIH ADA: ada di kedua file",baru:"BARU: hanya ada hari ini"};
-  const t1=cmp?modeLbl[cmp.mode]:(lastFile?lastFile.name:"Data");
+  const modeLbl={hilang:"HILANG / BERKURANG: ada di tab lama",tetap:"MASIH ADA: ada di kedua tab",baru:"BARU: hanya ada di tab baru"};
+  const t1=inCmp?modeLbl[cmp.mode]:s.name;
   const info=[N.toLocaleString("id-ID")+" baris"+(N>CAP?" (gambar memuat "+CAP+" pertama)":"")+" · "+new Date().toLocaleString("id-ID")];
-  if(cmp)info.push("Kemarin: "+cmp.pname+" · Hari ini: "+cmp.cname);
-  if(cmp&&cmp.mode==="hilang"){const f=[];if($("cComm").checked)f.push("kemarin COMM_QTY > 0");if($("cRes").checked)f.push("USAGE Reserve");if(f.length)info.push("Filter: "+f.join(" + "));}
+  if(inCmp){
+    info.push("Lama: "+book[cmp.a].name+" · Baru: "+book[cmp.b].name);
+    if(cmp.mode==="hilang"){const f=[];if($("cComm").checked)f.push("lama COMM_QTY > 0");if($("cRes").checked)f.push("USAGE Reserve");if($("cDec").checked)f.push("termasuk berkurang");if(f.length)info.push("Filter: "+f.join(" + "));}
+  }
   const tot=$("tot").textContent;if(tot)info.push(tot);
   m.font=FONT;
   const il=info.flatMap(x=>wrapLines(m,x,W-2*PX));
@@ -886,46 +938,96 @@ $("tLihat").onclick=()=>showTab("v");
 $("tCari").onclick=()=>showTab("s");
 function err(m){const e=$("err");e.textContent=m;e.style.display=m?"block":"none";}
 
-async function openFile(f){
-  err("");lastFile=f;closeMenu();cmp=null;$("cbar").style.display="none";
+let openedFiles=[];
+function setTitle(){
+  const n=book.reduce((x,t)=>x+t.nr,0).toLocaleString("id-ID");
+  $("title").textContent=openedFiles.length===1?openedFiles[0].name+" · "+n+" baris":openedFiles.length+" file · "+book.length+" tab · "+n+" baris";
+}
+/* Buka satu/banyak file. Tiap sheet berisi data jadi satu tab; sheet kosong dilewati.
+   append=true: ditambahkan ke tab yang sudah ada (tombol "+ File"). */
+async function openFiles(files,append){
+  files=[...files].filter(Boolean);if(!files.length)return;
+  err("");closeMenu();
+  const old=append&&book?book:[],added=[],okFiles=[],msgs=[];
   try{
-    $("title").textContent="Membaca "+f.name+"…";
-    await new Promise(r=>setTimeout(r,20));
-    expRange=null;$("oExp").value="";onlyFlag=false;$("oFlag").checked=false;
-    book=await loadBook(await f.arrayBuffer(),p=>{$("title").textContent="Membaca "+f.name+" … "+Math.round(p*100)+"%";});
-    const n=book.reduce((a,s)=>a+s.nr,0);
-    $("title").textContent=f.name+" · "+n.toLocaleString("id-ID")+" baris";
-    cur=null;sel=null;si=0;
+    if(!append){expRange=null;$("oExp").value="";onlyFlag=false;$("oFlag").checked=false;}
+    for(let k=0;k<files.length;k++){
+      const f=files[k],tag=files.length>1?" ("+(k+1)+"/"+files.length+")":"";
+      $("title").textContent="Membaca "+f.name+tag+"…";
+      await new Promise(r=>setTimeout(r,20));
+      let sheets;
+      try{sheets=await loadBook(await f.arrayBuffer(),p=>{$("title").textContent="Membaca "+f.name+tag+" … "+Math.round(p*100)+"%";});}
+      catch(e){msgs.push(f.name+": "+((e&&e.message)||e));continue;}
+      const data=sheets.filter(t=>t.nr>0);
+      if(!data.length){msgs.push(f.name+": tidak ada data.");continue;}
+      const base=f.name.replace(/\.xlsx?m?$/i,"");
+      for(const t of data){
+        t.file=f.name;
+        let nm=data.length>1?base+" · "+t.name:base;
+        const used=new Set(old.concat(added).map(x=>x.name));
+        if(used.has(nm)){let n=2;while(used.has(nm+" ("+n+")"))n++;nm+=" ("+n+")";}
+        t.name=nm;added.push(t);
+      }
+      okFiles.push(f);
+    }
+    if(!added.length)throw new Error(msgs.join("\n")||"Tidak ada data yang bisa dibaca.");
+    cmpOff(true);
+    book=old.concat(added);
+    openedFiles=(append?openedFiles:[]).concat(okFiles);
+    cur=null;sel=null;si=append?old.length:0;
     $("empty").style.display="none";
-    $("fbar").style.display="flex";$("bPrev").style.display="";
+    $("fbar").style.display="flex";$("bAdd").style.display="";
     $("sheets").style.display=book.length>1?"flex":"none";$("bar").style.display="flex";sc.style.display="block";
-    buildTabs();fillColSelect();setSheet(0);
+    buildTabs();fillColSelect();setSheet(si);
     results=[];matches=new Map();$("res").innerHTML="";
     $("sum").textContent="Ketik kata yang dicari. Filter di atas ikut berlaku.";
     if($("q").value) doSearch();
-    showTab("v");
+    setTitle();showTab("v");
+    if(msgs.length)err(msgs.join("\n"));
   }catch(e){
-    $("title").textContent="Pembaca Excel Offline";
+    if(book)setTitle();else $("title").textContent="Pembaca Excel Offline";
     err((e&&e.message)||String(e));
   }
 }
-$("file").onchange=e=>{if(e.target.files[0]) openFile(e.target.files[0]); e.target.value="";};
+$("file").onchange=e=>{openFiles(e.target.files,false);e.target.value="";};
+$("fileAdd").onchange=e=>{openFiles(e.target.files,true);e.target.value="";};
 $("bCols").onclick=()=>{
   const v=prompt("Kolom yang ditampilkan (nama header, pisahkan dengan koma).\nKosongkan = tampilkan semua kolom.",colSetting);
   if(v===null)return;
   colSetting=v;lsSet("cols2",v);
-  if(lastFile) openFile(lastFile);
+  if(openedFiles.length) openFiles(openedFiles,false);
 };
 let dc=0;
 addEventListener("dragenter",e=>{e.preventDefault();dc++;$("drop").style.display="flex";});
 addEventListener("dragleave",e=>{e.preventDefault();if(--dc<=0){dc=0;$("drop").style.display="none";}});
 addEventListener("dragover",e=>e.preventDefault());
-addEventListener("drop",e=>{e.preventDefault();dc=0;$("drop").style.display="none";if(e.dataTransfer.files[0]) openFile(e.dataTransfer.files[0]);});
+addEventListener("drop",e=>{e.preventDefault();dc=0;$("drop").style.display="none";if(e.dataTransfer.files.length) openFiles(e.dataTransfer.files,false);});
 
 function buildTabs(){
   const box=$("sheets");box.innerHTML="";
-  book.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s.name;
-    b.onclick=()=>{closeMenu();setSheet(i);};box.appendChild(b);});
+  book.forEach((t,i)=>{
+    const b=document.createElement("button");
+    const n=document.createElement("span");n.className="tn";n.textContent=t.name;b.appendChild(n);
+    if(book.length>1){
+      const x=document.createElement("span");x.className="tx";x.textContent="×";x.title="Tutup tab ini";
+      x.onclick=ev=>{ev.stopPropagation();closeTab(i);};b.appendChild(x);
+    }
+    b.onclick=()=>{closeMenu();setSheet(i);};box.appendChild(b);
+  });
+  $("bCmp").style.display=book.length>1?"":"none";
+}
+function closeTab(i){
+  const t=book[i];
+  if(book.length<2||!confirm('Tutup tab "'+t.name+'"?'))return;
+  closeMenu();cmpOff();
+  book.splice(i,1);
+  if(!book.some(x=>x.file===t.file))openedFiles=openedFiles.filter(f=>f.name!==t.file);
+  cur=null;sel=null;si=si>i?si-1:Math.min(si,book.length-1);
+  $("sheets").style.display=book.length>1?"flex":"none";
+  buildTabs();fillColSelect();setSheet(si);
+  results=[];matches=new Map();$("res").innerHTML="";
+  if($("q").value)doSearch();
+  setTitle();
 }
 function fillColSelect(){
   const o=$("oCol");o.innerHTML='<option value="-1">Semua kolom</option>';
