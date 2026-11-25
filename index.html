@@ -38,6 +38,20 @@ nav button.on{color:var(--ac);border-bottom-color:var(--ac)}
 #cbar .btn{padding:5px 10px;font-size:12px}
 #cbar label{display:flex;gap:4px;align-items:center}
 #cbar #cInfo{flex-basis:100%;font-size:12px;opacity:.8}
+#cards{flex:1;min-height:0;overflow:auto;display:none;padding:8px;background:var(--bg);-webkit-overflow-scrolling:touch}
+body.cardv.hasdata #cards{display:block}
+body.cardv #sc,body.cardv #bar{display:none!important}
+.cd{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.cd .t1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cd .loc{font-size:18px;font-weight:700}
+.cd .tag{font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--bd);color:var(--mut)}
+.cd .no{color:var(--mut);font-size:11px}
+.cd .ds{margin:2px 0 8px;font-size:15px;font-weight:600;word-break:break-word}
+.cd .g{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px}
+.cd .g span{color:var(--mut)}
+.cd .g b{color:var(--tx);font-size:15px}
+.cd .g b.x0{color:var(--bad)}.cd .g b.x1{color:var(--warn)}.cd .g b.x2{color:var(--soon)}
+.cd .wr{margin-top:8px;padding:6px 8px;border-radius:6px;background:rgba(220,60,60,.15);color:var(--bad);font-weight:600;font-size:13px}
 #imgv{position:fixed;inset:0;z-index:200;background:#111;color:#fff;display:none;overflow:auto}
 #imgt{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#111;border-bottom:1px solid #333;font-size:12px;color:#bbb}
 #imgb img{width:100%;display:block;background:#fff}
@@ -99,6 +113,17 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .more{width:100%;margin-top:4px}
 mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
 #err{display:none;margin:10px 12px;padding:10px;border-radius:8px;background:#fde4e4;color:#8a1f1f}
+#lapm{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
+#lapm .box{background:var(--card);color:var(--tx);width:min(560px,100%);max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;padding:14px;display:flex;flex-direction:column;gap:10px}
+#lapm input[type=date],#lapm textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+#lapm .row{display:flex;gap:8px}#lapm .row .btn{flex:1}
+#lapPh{display:flex;gap:8px;flex-wrap:wrap}#lapPh .th{position:relative}#lapPh img{width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}
+#lapPh .th button{position:absolute;top:2px;right:2px;border:0;border-radius:50%;width:22px;height:22px;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+#lapv{position:fixed;inset:0;z-index:160;background:#111;color:#fff;display:none;overflow:auto}
+#lapv .top{position:sticky;top:0;background:#111;border-bottom:1px solid #333;padding:8px 10px;display:flex;gap:8px;align-items:center;z-index:2}
+#lapv .lp{border-bottom:1px solid #333;padding:12px}#lapv .lph{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}#lapv .lph img{height:110px;border-radius:6px}
+#lapv .la{display:flex;gap:8px}
+.cd .lpb{margin-top:8px;width:100%}.cd .lpd{margin-top:6px;font-size:12px;color:var(--ac);font-weight:600}
 #drop{position:fixed;inset:0;background:rgba(31,122,77,.85);color:#fff;display:none;align-items:center;justify-content:center;font-size:22px;font-weight:700;z-index:99}
 </style>
 </head>
@@ -127,10 +152,12 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
     </select>
   </label>
   <span><b class="x0">■</b> lewat &nbsp;<b class="x1">■</b> ≤30 hari &nbsp;<b class="x2">■</b> ≤90 hari</span>
-  <span id="lFlag" style="display:none;align-items:center;gap:6px" title="Exp sebelum tgl transaksi, umur simpan jauh dari kebiasaan barang yang sama, umur >5 tahun, atau tgl transaksi di masa depan"><label style="cursor:pointer"><input type="checkbox" id="oFlag"> <b class="x0">⚠ Curiga salah input exp</b> <span id="nFlag"></span></label><select id="oSens" title="Sensitivitas deteksi"><option value="l">Longgar</option><option value="m" selected>Sedang</option><option value="k">Ketat</option></select></span>
+  <span id="lFlag" style="display:none;align-items:center;gap:6px" title="Exp sebelum tgl transaksi, umur simpan jauh dari umur simpan paling sering (modus per penerimaan) barang yang sama, ED/tgl transaksi LPN sama beda antar tab, exp beda dari lot lain di tgl transaksi yang sama, umur >5 tahun, atau tgl transaksi di masa depan"><label style="cursor:pointer"><input type="checkbox" id="oFlag"> <b class="x0">⚠ Curiga salah input exp</b> <span id="nFlag"></span></label><select id="oSens" title="Sensitivitas deteksi"><option value="l">Longgar</option><option value="m" selected>Sedang</option><option value="k">Ketat</option></select></span>
   <button class="btn sec" id="bReset" style="display:none">Reset filter</button>
+  <button class="btn sec" id="bView" title="Tampilan kartu: semua isi satu baris terlihat tanpa geser kanan-kiri">Kartu</button>
   <button class="btn sec" id="bImg" title="Buat gambar PNG dari data yang sedang tampil (sesuai filter &amp; urutan)">Gambar</button>
   <button class="btn sec" id="bFit" title="Perkecil kolom &amp; huruf supaya semua kolom muat selebar layar (untuk screenshot)">Mode SS</button>
+  <button class="btn sec" id="bLaps" title="Laporan ED beda yang sudah difoto">Laporan (0)</button>
   <button class="btn sec" id="bCsv" title="Unduh baris yang tampil (sesuai filter &amp; urutan) sebagai CSV">Ekspor CSV</button>
   <span class="cnt"><span id="cnt"></span><br><span id="tot" style="font-weight:400;color:var(--mut)"></span></span>
 </div>
@@ -158,8 +185,9 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
   <section class="tab on" id="viewTab">
     <div id="empty"><div class="big">📊</div><p><b>Belum ada file</b></p><p>Tekan <b>Buka file</b> atau seret file .xlsx ke sini. Semua diproses di perangkat Anda, tanpa internet. File besar (ratusan ribu baris) didukung.</p></div>
     <div id="sheets"></div>
-    <div id="bar"><b id="ref"></b><span id="val"></span></div>
+    <div id="bar"><b id="ref"></b><span id="val"></span><button class="btn sec" id="bLap" style="padding:4px 10px;font-size:12px;flex:none">📷 Lapor ED</button></div>
     <div id="sc"><div id="hd"></div><div id="sz"><div id="rows"></div></div></div>
+    <div id="cards"></div>
   </section>
   <section class="tab" id="searchTab">
     <div id="sbox">
@@ -179,6 +207,15 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
   <div id="imgt"><button class="btn sec" id="imgClose">Tutup</button><button class="btn sec" id="imgCols">Ubah kolom</button><span>Tekan Simpan, atau screenshot layar ini (gambar sudah selebar layar)</span></div>
   <div id="imgb"></div>
 </div>
+<div id="lapm"><div class="box">
+  <b>📷 Lapor ED beda</b><div id="lapInfo" style="font-size:14px"></div>
+  <label>ED aktual (hasil lihat fisik)<input type="date" id="lapEd"></label>
+  <div id="lapPh"></div>
+  <label class="btn sec" style="text-align:center">📷 Ambil / pilih foto<input type="file" id="lapFile" accept="image/*" capture="environment" multiple></label>
+  <textarea id="lapNote" rows="2" placeholder="Catatan (opsional), mis. label ED tertulis 10/2027"></textarea>
+  <div class="row"><button class="btn sec" id="lapCancel">Batal</button><button class="btn" id="lapSave">Simpan laporan</button></div>
+</div></div>
+<div id="lapv"><div class="top"><button class="btn sec" id="lapvClose">Tutup</button><span>Laporan ED beda · tersimpan di perangkat ini</span></div><div id="lapBody"></div></div>
 <div id="drop">Lepas file di sini</div>
 
 <script>
@@ -370,6 +407,7 @@ async function loadBook(buf,prog){
     },got=>prog&&prog(0.35*got/Math.max(z.size("xl/sharedStrings.xml"),1)));
   }
   const wanted=colSetting.trim()?colSetting.split(",").map(norm).filter(Boolean):null;
+  if(wanted)for(const x of ["pluvital","lpnnumber"])if(!wanted.includes(x))wanted.push(x); // dibutuhkan pengecekan ED
   const sheets=[];let i=0;
   const defs=[...wb.getElementsByTagName("sheet")].filter(s=>!/hidden/i.test(s.getAttribute("state")||""));
   for(const s of defs){
@@ -385,14 +423,15 @@ async function loadBook(buf,prog){
     sh.trCol=sh.hdr.findIndex(h=>norm(h)==="transcdate");
     sh.qCols=sh.hdr.map((h,c)=>/^(savaqty|commqty)$/.test(norm(h))?c:-1).filter(c=>c>=0);
     sh.exp=new Float64Array(sh.nr).fill(NaN);
-    sh.flag=new Uint8Array(sh.nr);sh.chkCol=-1;sh.nFlag=0;
+    sh.flag=new Uint8Array(sh.nr);sh.chkCol=-1;sh.nFlag=0;sh.nNoRef=0;sh.xmsg=null;
+    sh.lpnCol=sh.hdr.findIndex(h=>norm(h)==="lpnnumber");
     const dayOf=t=>{const m=RE_D.exec(t||"");return m?Date.UTC(+m[1],+m[2]-1,+m[3])/864e5:NaN;};
     if(sh.expCol>=0)for(let r=0;r<sh.nr;r++)sh.exp[r]=dayOf(sh.rows[r][sh.expCol]);
     if(sh.expCol>=0&&sh.trCol>=0)addCheck(sh,dayOf);
     const w=sh.hdr.map(h=>Math.min(320,h.length*8+48));
     for(let r=0;r<Math.min(sh.nr,300);r++){const row=sh.rows[r];
       for(let c=0;c<sh.nc;c++){const x=row[c];if(x)w[c]=Math.max(w[c],Math.min(320,x.length*8+20));}}
-    if(sh.chkCol>=0)w[sh.chkCol]=300;
+    if(sh.chkCol>=0){w[sh.chkCol]=420;w[sh.sugCol]=100;w[sh.difCol]=100;}
     sh.w0=w;layoutCols(sh);
     rebuildView(sh);
     sheets.push(sh);
@@ -402,14 +441,30 @@ async function loadBook(buf,prog){
 }
 
 /* ---------- Deteksi dini salah input EXP ---------- */
-/* Umur simpan tiap baris = EXP - TRANSAKSI. Pembanding = median umur simpan barang yang sama
-   (min. 4 baris). Toleransi otomatis per barang:
-   - barang "seragam" (>=70% lot dalam ±3 hari dari median): toleransi kecil (c1)
-   - barang bervariasi: max(c2, k x sebaran(MAD), f x median)
-   Sensitivitas mengatur c1/c2/k/f. Juga: exp <= transaksi, umur >5 tahun, transaksi di masa depan. */
+/* Umur simpan = EXP - TGL TRANSAKSI. Pembanding = umur simpan yang PALING SERING muncul (modus) pada barang yang sama.
+   - Dihitung per PENERIMAAN UNIK (barang + tgl transaksi + exp), bukan per baris, supaya satu penerimaan yang
+     dipecah ke puluhan pallet/lokasi tidak mendominasi pembanding.
+   - Modus = gerombolan umur simpan terpadat (jendela ±3% / min ±3 hari). Perlu >=3 penerimaan unik.
+   - Toleransi: barang "seragam" (>=70% penerimaan dalam ±3 hari dari modus) -> c1; selain itu max(c2, k x MAD, f x modus).
+   Aturan lain: exp <= transaksi, umur >5 tahun, transaksi di masa depan, "lot saudara" (barang+tgl transaksi sama,
+   exp menyimpang dari kelompoknya), dan ED/tgl transaksi LPN yang sama berbeda antar tab (file). */
 const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-const SENS={k:{c1:3,c2:7,k:3,f:.10},m:{c1:5,c2:14,k:4,f:.20},l:{c1:10,c2:30,k:6,f:.50}};
+const SENS={k:{c1:3,c2:7,k:3,f:.10,s:7},m:{c1:5,c2:14,k:4,f:.20,s:10},l:{c1:10,c2:30,k:6,f:.50,s:14}};
 let sens="m";
+const dstr=d=>new Date(Math.round(d)*864e5).toISOString().slice(0,10);
+function modeRef(a){
+  const v=Float64Array.from(a).sort(),n=v.length;
+  let lo=0,hi=0,best=0,bl=0,bh=0;
+  for(let i=0;i<n;i++){
+    const w=Math.max(3,Math.round(.03*v[i]));
+    while(v[lo]<v[i]-w)lo++;
+    if(hi<i)hi=i;
+    while(hi+1<n&&v[hi+1]<=v[i]+w)hi++;
+    if(hi-lo+1>best){best=hi-lo+1;bl=lo;bh=hi;}
+  }
+  const len=bh-bl+1,ref=len%2?v[bl+(len>>1)]:(v[bl+len/2-1]+v[bl+len/2])/2;
+  return {med:ref,mad:median(Array.from(v,x=>Math.abs(x-ref))),cons:Array.from(v).filter(x=>Math.abs(x-ref)<=3).length/n>=0.7,n};
+}
 function addCheck(sh,dayOf){
   const rows=sh.rows,n=sh.nr;
   const pc=sh.hdr.findIndex(h=>norm(h)==="pluvital"),dc=sh.hdr.findIndex(h=>norm(h)==="description");
@@ -419,49 +474,90 @@ function addCheck(sh,dayOf){
     tr[r]=dayOf(rows[r][sh.trCol]);
     const k=kc>=0?rows[r][kc].toLowerCase():"";keys[r]=k;
     const life=sh.exp[r]-tr[r];
-    if(life>0){let g=groups.get(k);if(!g)groups.set(k,g=[]);g.push(life);}
+    if(life>0){let g=groups.get(k);if(!g)groups.set(k,g=new Map());g.set(tr[r]+"|"+sh.exp[r],life);}
   }
+  const sibG=new Map(),gk=new Array(n);
+  for(let r=0;r<n;r++){
+    const e=sh.exp[r],t=tr[r];
+    if(e===e&&t===t){const q=keys[r]+"|"+t;gk[r]=q;let a=sibG.get(q);if(!a)sibG.set(q,a=[]);a.push(e);}else gk[r]="";
+  }
+  const sib=new Map();
+  for(const [q,a] of sibG){if(a.length>=3)sib.set(q,{med:median(a),n:a.length});}
   const info=new Map();
   for(const [k,g] of groups){
-    if(g.length<4)continue;
-    const med=median(g),mad=median(g.map(l=>Math.abs(l-med)));
-    const cons=g.filter(l=>Math.abs(l-med)<=3).length/g.length>=0.7;
-    info.set(k,{med,mad,cons});
+    if(g.size<3)continue;
+    info.set(k,modeRef([...g.values()]));
   }
-  sh.hdr.push("CEK_EXP");sh.chkCol=sh.nc;sh.nc++;
-  for(let r=0;r<n;r++)rows[r].push("");
-  sh.chk={tr,keys,info};
+  sh.hdr.push("CEK_EXP","ED_SARAN","SELISIH_HARI");
+  sh.chkCol=sh.nc;sh.sugCol=sh.nc+1;sh.difCol=sh.nc+2;sh.nc+=3;
+  for(let r=0;r<n;r++)rows[r].push("","","");
+  sh.chk={tr,keys,info,gk,sib};sh.xmsg=null;sh.nNoRef=0;
   runCheck(sh);
 }
 function runCheck(sh){
   if(sh.chkCol<0)return;
-  const P=SENS[sens],{tr,keys,info}=sh.chk,T=todayN(),rows=sh.rows;
-  sh.nFlag=0;
+  const P=SENS[sens],{tr,keys,info,gk,sib}=sh.chk,T=todayN(),rows=sh.rows;
+  sh.nFlag=0;sh.nNoRef=0;
   for(let r=0;r<sh.nr;r++){
-    const e=sh.exp[r],t=tr[r],msgs=[];let bit=0;
+    const e=sh.exp[r],t=tr[r],msgs=[];let bit=0,sug="",dif="";
     if(e===e&&t===t){
-      const life=e-t;
-      if(life<=0){msgs.push("Exp ≤ tgl transaksi");bit|=1;}
-      else{
-        const f=info.get(keys[r]);let dev=false;
+      const life=e-t,f=info.get(keys[r]);
+      if(life<=0){
+        msgs.push("Exp ≤ tgl transaksi");bit|=1;
+        if(f){sug=dstr(t+f.med);dif=String(Math.round(Math.abs(life-f.med)));}
+      }else{
+        let dev=false;
         if(f){
           const tol=f.cons?P.c1:Math.max(P.c2,P.k*f.mad,P.f*f.med);
-          if(Math.abs(life-f.med)>tol){
-            let m="Umur "+life+" hari (biasanya ±"+Math.round(f.med)+")";
+          const d=life-f.med;
+          if(Math.abs(d)>tol){
+            let m="Umur "+life+" hari, normalnya ±"+Math.round(f.med)+" ("+(d>0?"+":"−")+Math.round(Math.abs(d))+" hari; "+f.n+" penerimaan)";
+            sug=dstr(t+f.med);dif=String(Math.round(Math.abs(d)));
             const mm=RE_D.exec(rows[r][sh.expCol]);
-            if(mm&&+mm[3]<=12&&+mm[3]!==+mm[2]){
-              const swl=Date.UTC(+mm[1],+mm[3]-1,+mm[2])/864e5-t;
-              if(Math.abs(swl-f.med)<=tol&&Math.abs(swl-f.med)<Math.abs(life-f.med)/2)m+=" — hari/bulan tertukar?";
+            if(mm){
+              const y=+mm[1],mo=+mm[2],dd=+mm[3];let best=null;
+              const tryC=(lbl,ed)=>{const dl=ed-t;if(dl>0&&Math.abs(dl-f.med)<=tol&&(!best||Math.abs(dl-f.med)<best.d))best={lbl,ed,d:Math.abs(dl-f.med)};};
+              if(dd<=12&&dd!==mo)tryC("hari/bulan tertukar?",Date.UTC(y,dd-1,mo)/864e5);
+              for(const dy of [-1,1,-10,10])tryC("tahun salah? ("+y+"→"+(y+dy)+")",Date.UTC(y+dy,mo-1,dd)/864e5);
+              if(best){m+=" — "+best.lbl;sug=dstr(best.ed);}
             }
             msgs.push(m);bit|=2;dev=true;
           }
         }
+        if(!dev&&!f){ // lot saudara hanya jadi cadangan bila barang belum punya pembanding umur simpan (selain itu hampir semuanya penerimaan multi-batch yang wajar)
+          const sg=sib.get(gk[r]);
+          if(sg&&Math.abs(e-sg.med)>P.s){msgs.push("Exp beda "+Math.round(Math.abs(e-sg.med))+" hari dari lot lain di tgl transaksi sama ("+sg.n+" lot)");bit|=2;dev=true;if(!sug)sug=dstr(sg.med);dif=String(Math.round(Math.abs(e-sg.med)));}
+        }
         if(!dev&&life>1826){msgs.push("Umur simpan >5 tahun");bit|=4;}
+        if(!f&&!dev&&!bit)sh.nNoRef++;
       }
     }
     if(t===t&&t>T+1){msgs.push("Tgl transaksi di masa depan");bit|=4;}
-    rows[r][sh.chkCol]=msgs.join("; ");sh.flag[r]=bit;if(bit)sh.nFlag++;
+    const xm=sh.xmsg&&sh.xmsg[r];if(xm){msgs.push(xm);bit|=2;}
+    rows[r][sh.chkCol]=msgs.join("; ");rows[r][sh.sugCol]=sug;rows[r][sh.difCol]=dif;sh.flag[r]=bit;if(bit)sh.nFlag++;
   }
+}
+/* Bandingkan pallet (LPN + barang) yang sama antar tab (mis. SOH tgl 20 vs 23): ED atau tgl transaksi-nya berubah =
+   ada yang mengoreksi / salah ketik. LPN kosong dilewati; satu LPN boleh punya beberapa baris, jadi dibandingkan per himpunan. */
+function crossCheck(bk){
+  const cs=bk.filter(s=>s.chkCol>=0&&s.lpnCol>=0);
+  const fmt=st=>[...st].map(v=>v===v?dstr(v):"kosong").sort().join(" / ");
+  if(cs.length<2){cs.forEach(s=>{if(s.xmsg){s.xmsg=null;runCheck(s);}});return;}
+  const maps=cs.map(s=>{const m=new Map();for(let r=0;r<s.nr;r++){const l=s.rows[r][s.lpnCol];if(!l)continue;
+    const k=l+"|"+s.chk.keys[r];let o=m.get(k);if(!o)m.set(k,o={e:new Set(),t:new Set()});o.e.add(s.exp[r]);o.t.add(s.chk.tr[r]);}return m;});
+  cs.forEach((s,i)=>{
+    const x=new Array(s.nr).fill("");let any=false;
+    for(let r=0;r<s.nr;r++){
+      const l=s.rows[r][s.lpnCol];if(!l)continue;const k=l+"|"+s.chk.keys[r],ps=[],e0=s.exp[r],t0=s.chk.tr[r];
+      cs.forEach((o,j)=>{
+        if(j===i)return;const v=maps[j].get(k);if(!v)return;
+        if(e0===e0&&!v.e.has(e0))ps.push("ED di «"+o.name+"» = "+fmt(v.e));
+        if(t0===t0&&!v.t.has(t0))ps.push("tgl transaksi di «"+o.name+"» = "+fmt(v.t));
+      });
+      if(ps.length){x[r]="Pallet sama tapi beda: "+ps.join(", ");any=true;}
+    }
+    s.xmsg=any?x:null;runCheck(s);
+  });
 }
 
 /* ---------- Lebar kolom (Mode SS = muat selebar layar) ---------- */
@@ -519,7 +615,7 @@ function updateFbar(){
   const sums=s.qCols.map(c=>{let t=0;for(const r of s.view){const v=parseFloat(s.rows[r][c]);if(v===v)t+=v;}return s.hdr[c]+" "+fmtN(t);});
   $("tot").textContent=sums.join(" · ");
   $("lFlag").style.display=s.chkCol>=0?"inline-flex":"none";
-  $("nFlag").textContent="("+s.nFlag.toLocaleString("id-ID")+")";
+  $("nFlag").textContent="("+s.nFlag.toLocaleString("id-ID")+")"+(s.nNoRef?" · "+s.nNoRef.toLocaleString("id-ID")+" baris belum ada pembanding":"");
   $("bReset").style.display=anyFilter()?"":"none";
   const has=book.some(x=>x.expCol>=0);
   $("oExp").disabled=!has;$("oExp").title=has?"":"Kolom EXP_DATE tidak ada pada kolom yang ditampilkan";
@@ -640,6 +736,51 @@ function openMenu(c,anchor){
 }
 document.addEventListener("pointerdown",e=>{if(menu&&!menu.contains(e.target)&&!e.target.closest(".h"))closeMenu();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
+
+/* ---------- Tampilan kartu (satu baris = satu kartu, tanpa geser kanan-kiri) ---------- */
+let cardMode=lsGet("cardv")==="1",cardKey=null,cardN=0;
+const CARD_PAGE=60;
+function cardHtml(s,r,C,T){
+  const row=s.rows[r],g=c=>c>=0?(row[c]||""):"";
+  let h='<div class="cd"><div class="t1"><span class="loc">'+esc(g(C.loc)||("Baris "+(r+1)))+'</span><span>'
+    +(g(C.us)?'<span class="tag">'+esc(g(C.us))+'</span> ':'')+'<span class="no">#'+(r+1)+'</span></span></div>';
+  if(C.desc>=0)h+='<div class="ds">'+esc(g(C.desc))+'</div>';
+  const kv=(lab,c,cls)=>c>=0?'<div><span>'+lab+'</span> <b'+(cls?' class="'+cls+'"':'')+'>'+esc(g(c)||"-")+'</b></div>':"";
+  h+='<div class="g">'+kv("Qty",C.ava)+kv("Commit",C.com)+kv("Transaksi",C.tr)+kv("Exp",C.ex,C.ex>=0?expCls(s,r,T):"")+'</div>';
+  const msg=[];
+  if(s.chgCol!=null&&row[s.chgCol])msg.push(row[s.chgCol]);
+  if(s.chkCol>=0&&row[s.chkCol])msg.push("⚠ "+row[s.chkCol]);
+  if(msg.length)h+='<div class="wr">'+msg.map(esc).join("<br>")+'</div>';
+  const ri=rowInfo(s,r),nl=lapIdx.get(lapKey(ri))||0;
+  if(nl)h+='<div class="lpd">✔ Sudah dilaporkan ('+nl+')</div>';
+  h+='<button class="btn sec lpb" data-lap="'+r+'">📷 Lapor ED</button>';
+  return h+'</div>';
+}
+function renderCards(){
+  const s=curSheet(),box=$("cards");if(!s)return;
+  const V=s.view;
+  if(cardKey!==V){cardKey=V;cardN=Math.min(V.length,CARD_PAGE);box.scrollTop=0;}
+  const f=n=>s.hdr.findIndex(h=>norm(h)===n);
+  const C={loc:f("location"),desc:f("description"),ava:f("savaqty"),com:f("commqty"),tr:f("transcdate"),ex:f("expdate"),us:f("usage")},T=todayN();
+  let h="";
+  for(let i=0;i<cardN;i++)h+=cardHtml(s,V[i],C,T);
+  if(!V.length)h='<p style="color:var(--mut);padding:16px">Tidak ada baris yang cocok dengan filter.</p>';
+  if(cardN<V.length)h+='<button class="btn sec" id="cMore" style="width:100%;margin:4px 0 16px">Tampilkan '+Math.min(CARD_PAGE,V.length-cardN)+' lagi ('+cardN.toLocaleString("id-ID")+' dari '+V.length.toLocaleString("id-ID")+')</button>';
+  box.innerHTML=h;
+}
+$("cards").addEventListener("click",e=>{
+  const lb=e.target.closest("[data-lap]");if(lb){openLap(rowInfo(curSheet(),+lb.dataset.lap));return;}
+  if(e.target.id!=="cMore")return;
+  const s=curSheet(),box=$("cards"),keep=box.scrollTop;
+  cardN=Math.min(s.view.length,cardN+CARD_PAGE);renderCards();box.scrollTop=keep;
+});
+function applyView(){
+  document.body.classList.toggle("cardv",cardMode);
+  $("bView").textContent=cardMode?"Tabel":"Kartu";
+  if(book&&curSheet()){cardKey=null;render();}
+}
+$("bView").onclick=()=>{cardMode=!cardMode;lsSet("cardv",cardMode?"1":"0");applyView();};
+applyView();
 
 /* ---------- Bandingkan dua tab ---------- */
 /* Baris dicocokkan lewat "kunci" (default: location + description + exp_date).
@@ -973,11 +1114,12 @@ async function openFiles(files,append){
     if(!added.length)throw new Error(msgs.join("\n")||"Tidak ada data yang bisa dibaca.");
     cmpOff(true);
     book=old.concat(added);
+    crossCheck(book);
     openedFiles=(append?openedFiles:[]).concat(okFiles);
     cur=null;sel=null;si=append?old.length:0;
     $("empty").style.display="none";
     $("fbar").style.display="flex";$("bAdd").style.display="";
-    $("sheets").style.display=book.length>1?"flex":"none";$("bar").style.display="flex";sc.style.display="block";
+    $("sheets").style.display=book.length>1?"flex":"none";$("bar").style.display="flex";sc.style.display="block";document.body.classList.add("hasdata");
     buildTabs();fillColSelect();setSheet(si);
     results=[];matches=new Map();$("res").innerHTML="";
     $("sum").textContent="Ketik kata yang dicari. Filter di atas ikut berlaku.";
@@ -1060,6 +1202,7 @@ function expCls(s,r,T){
   return d<0?"x0":d<=30?"x1":d<=90?"x2":"";
 }
 function render(){
+  if(cardMode){renderCards();return;}
   const s=curSheet();if(!s||!sc.clientHeight)return;
   const V=s.view,T=todayN();
   const st=Math.max(0,Math.floor(sc.scrollTop/RH)-2);
@@ -1188,6 +1331,124 @@ $("res").addEventListener("click",e=>{
   const b=e.target.closest(".res");if(!b)return;
   const x=results[+b.dataset.k];goto(x.s,x.r,x.c);
 });
+
+/* ---------- Laporan ED beda (foto + ED aktual), disimpan di perangkat (IndexedDB) ---------- */
+let laps=[],lapIdx=new Map(),lapDraft=null;
+const idbReq=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});
+let _db=null;
+function lapDb(){
+  if(_db)return _db;
+  _db=new Promise((ok,no)=>{try{const q=indexedDB.open("soh-lapor",1);q.onupgradeneeded=()=>q.result.createObjectStore("r",{keyPath:"id"});q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error);}catch(e){no(e);}});
+  return _db;
+}
+async function lapTx(mode,fn){const db=await lapDb();return idbReq(fn(db.transaction("r",mode).objectStore("r")));}
+async function lapLoad(){
+  try{laps=(await lapTx("readonly",s=>s.getAll())).sort((a,b)=>b.ts-a.ts);}catch(e){laps=[];}
+  lapReindex();
+}
+const lapKey=o=>[o.loc,o.plu||o.desc,o.tr,o.exSys].join("|");
+function lapReindex(){
+  lapIdx=new Map();for(const l of laps)lapIdx.set(lapKey(l),(lapIdx.get(lapKey(l))||0)+1);
+  $("bLaps").textContent="Laporan ("+laps.length+")";
+}
+function rowInfo(s,r){
+  const row=s.rows[r],f=n=>s.hdr.findIndex(h=>norm(h)===n),g=n=>{const c=f(n);return c>=0?(row[c]||""):"";};
+  const d=t=>{const m=RE_D.exec(t||"");return m?m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0"):"";};
+  return {tab:s.name,loc:g("location"),desc:g("description"),plu:g("pluvital"),lpn:g("lpnnumber"),tr:d(g("transcdate")),exSys:d(g("expdate")),
+    qty:g("savaqty"),usage:g("usage"),cek:s.chkCol>=0?row[s.chkCol]:"",sug:s.sugCol>=0?row[s.sugCol]:""};
+}
+async function shrink(file){ // kecilkan foto: maks 1280px, JPEG 0.75 (foto HP 5-10MB -> ±200KB)
+  const bmp=await createImageBitmap(file,{imageOrientation:"from-image"});
+  const k=Math.min(1,1280/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");
+  c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  if(bmp.close)bmp.close();
+  return new Promise(ok=>c.toBlob(ok,"image/jpeg",.75));
+}
+function openLap(info){
+  lapDraft={info,photos:[]};
+  const i=info;
+  $("lapInfo").innerHTML='<b>'+esc(i.desc||"-")+'</b><br>Lokasi '+esc(i.loc||"-")+(i.plu?' · PLU '+esc(i.plu):'')+'<br>Transaksi '+esc(i.tr||"-")+' · <span class="x0">ED sistem '+esc(i.exSys||"-")+'</span>'
+    +(i.cek?'<br><small>⚠ '+esc(i.cek)+'</small>':'');
+  $("lapEd").value=i.sug&&/^\d{4}-\d\d-\d\d$/.test(i.sug)?"":"";
+  $("lapNote").value="";lapThumbs();$("lapm").style.display="flex";
+}
+function lapThumbs(){
+  const box=$("lapPh");box.innerHTML="";
+  lapDraft.photos.forEach((b,k)=>{
+    const d=document.createElement("div");d.className="th";const im=new Image();im.src=URL.createObjectURL(b);
+    const x=document.createElement("button");x.textContent="×";x.onclick=()=>{lapDraft.photos.splice(k,1);lapThumbs();};
+    d.append(im,x);box.append(d);
+  });
+}
+$("lapFile").onchange=async e=>{
+  for(const f of e.target.files){try{lapDraft.photos.push(await shrink(f));}catch(x){alert("Foto tidak bisa dibaca: "+x.message);}}
+  e.target.value="";lapThumbs();
+};
+$("lapCancel").onclick=()=>{$("lapm").style.display="none";lapDraft=null;};
+$("lapSave").onclick=async()=>{
+  const ed=$("lapEd").value;
+  if(!ed){alert("Isi ED aktual dulu.");return;}
+  if(!lapDraft.photos.length&&!confirm("Belum ada foto. Simpan tanpa foto?"))return;
+  const rec=Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),exAkt:ed,note:$("lapNote").value.trim(),photos:lapDraft.photos},lapDraft.info);
+  try{await lapTx("readwrite",s=>s.put(rec));}catch(e){alert("Gagal menyimpan (penyimpanan penuh/diblokir?): "+e.message);return;}
+  laps.unshift(rec);lapReindex();$("lapm").style.display="none";lapDraft=null;
+  if(cardMode)renderCards();
+};
+const lapDiff=l=>Math.round((Date.parse(l.exAkt)-Date.parse(l.exSys))/864e5);
+function lapList(){
+  const box=$("lapBody");
+  if(!laps.length){box.innerHTML='<p style="padding:16px;color:#bbb">Belum ada laporan. Pilih baris (tombol 📷 Lapor ED di kartu atau di bar atas tabel).</p>';return;}
+  box.innerHTML=laps.map((l,k)=>{const d=lapDiff(l);
+    return '<div class="lp"><div class="lt"><b>'+esc(l.desc)+'</b><br>'+esc(l.loc)+' · sistem <span class="x0">'+esc(l.exSys)+'</span> → aktual <b style="color:#5fd38d">'+esc(l.exAkt)+'</b>'
+    +(isNaN(d)?'':' ('+(d>0?"+":"")+d+' hari)')+(l.note?'<br><small>'+esc(l.note)+'</small>':'')+'<br><small>'+esc(l.tab)+' · '+new Date(l.ts).toLocaleString("id-ID")+'</small></div>'
+    +'<div class="lph">'+l.photos.map(b=>'<img src="'+URL.createObjectURL(b)+'">').join("")+'</div>'
+    +'<div class="la"><button class="btn" data-a="img" data-k="'+k+'">Gambar / bagikan</button><button class="btn sec" data-a="del" data-k="'+k+'">Hapus</button></div></div>';}).join("");
+}
+async function lapImage(l){
+  const W=1100,P=24,FONT="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+  const bms=await Promise.all(l.photos.map(b=>createImageBitmap(b)));
+  const m=document.createElement("canvas").getContext("2d");
+  m.font="bold 28px "+FONT;const dl=wrapLines(m,l.desc||"-",W-2*P);
+  m.font="22px "+FONT;const nl=l.note?wrapLines(m,"Catatan: "+l.note,W-2*P):[];
+  const pw=(W-3*P)/2,hs=bms.map(b=>b.height*pw/b.width);
+  let ph=0;for(let i=0;i<bms.length;i+=2)ph+=Math.min(560,Math.max(hs[i],hs[i+1]||0))+P;
+  const H=84+dl.length*36+170+nl.length*30+(ph?ph+P:0)+P;
+  const c=document.createElement("canvas");c.width=W;c.height=Math.ceil(H);const x=c.getContext("2d");
+  x.fillStyle="#fff";x.fillRect(0,0,W,H);x.fillStyle="#1f7a4d";x.fillRect(0,0,W,70);
+  x.fillStyle="#fff";x.font="bold 30px "+FONT;x.fillText("LAPORAN ED BEDA",P,46);
+  x.font="20px "+FONT;x.textAlign="right";x.fillText(new Date(l.ts).toLocaleString("id-ID"),W-P,44);x.textAlign="left";
+  let y=84+30;x.fillStyle="#1d2330";x.font="bold 28px "+FONT;for(const t of dl){x.fillText(t,P,y);y+=36;}
+  x.font="22px "+FONT;x.fillStyle="#444";
+  x.fillText("Lokasi "+(l.loc||"-")+(l.plu?"   PLU "+l.plu:"")+(l.lpn?"   LPN "+l.lpn:""),P,y);y+=32;
+  x.fillText("Tgl transaksi "+(l.tr||"-")+"   Qty "+(l.qty||"-")+"   "+(l.usage||""),P,y);y+=44;
+  x.font="bold 34px "+FONT;x.fillStyle="#c62828";x.fillText("ED sistem  "+l.exSys,P,y);
+  x.fillStyle="#1f7a4d";x.fillText("ED aktual  "+l.exAkt,W/2,y);y+=34;
+  const d=lapDiff(l);if(!isNaN(d)){x.font="22px "+FONT;x.fillStyle="#444";x.fillText("Selisih "+(d>0?"+":"")+d+" hari",P,y);}y+=42;
+  x.font="22px "+FONT;x.fillStyle="#1d2330";for(const t of nl){x.fillText(t,P,y);y+=30;}
+  y+=8;
+  for(let i=0;i<bms.length;i+=2){
+    const rh=Math.min(560,Math.max(hs[i],hs[i+1]||0));
+    [i,i+1].forEach((j,col)=>{if(!bms[j])return;const sc=Math.min(pw/bms[j].width,rh/bms[j].height),w=bms[j].width*sc,h=bms[j].height*sc;
+      x.drawImage(bms[j],P+col*(pw+P)+(pw-w)/2,y+(rh-h)/2,w,h);});
+    y+=rh+P;
+  }
+  bms.forEach(b=>b.close&&b.close());
+  return new Promise(ok=>c.toBlob(ok,"image/jpeg",.9));
+}
+async function lapShare(l){
+  const blob=await lapImage(l),name="ED_"+(l.loc||"x")+"_"+l.exAkt+".jpg",file=new File([blob],name,{type:"image/jpeg"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Laporan ED beda"});return;}}catch(e){if(e&&e.name==="AbortError")return;}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+$("lapBody").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-a]");if(!b)return;const l=laps[+b.dataset.k];
+  if(b.dataset.a==="img"){b.disabled=true;try{await lapShare(l);}finally{b.disabled=false;}}
+  else if(b.dataset.a==="del"&&confirm("Hapus laporan ini?")){await lapTx("readwrite",s=>s.delete(l.id));laps=laps.filter(x=>x!==l);lapReindex();lapList();if(cardMode)renderCards();}
+});
+$("bLaps").onclick=()=>{lapList();$("lapv").style.display="block";};
+$("lapvClose").onclick=()=>{$("lapv").style.display="none";};
+$("bLap").onclick=()=>{const t=sel||cur;if(!t){alert("Ketuk dulu satu baris di tabel.");return;}openLap(rowInfo(book[t.s],t.r));};
+lapLoad();
 </script>
 <script>
 /* PWA: aktif hanya bila dibuka lewat https (mis. GitHub Pages); dibuka sebagai file lokal tetap jalan biasa */
